@@ -3,6 +3,10 @@ import * as VueRouter from "vue-router";
 import { createPinia } from 'pinia';
 import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
 
+// Ant Design Vue
+import Antd from "ant-design-vue";
+import 'ant-design-vue/dist/reset.css';
+
 import routes from "./configs/routes";
 import App from './App.vue'
 import './style.css'
@@ -17,4 +21,4 @@ const router = VueRouter.createRouter({
 const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
 
-createApp(App).use(router).use(pinia).mount('#app')
+createApp(App).use(router).use(pinia).use(Antd).mount('#app')

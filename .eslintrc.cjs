@@ -12,6 +12,7 @@ module.exports = {
     },
     plugins: ["vue", "@typescript-eslint", "prettier"],
     rules: {
+      semi: [2],
       complexity: ["error", 10],
       "prettier/prettier": "error",
     },

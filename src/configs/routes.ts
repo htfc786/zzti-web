@@ -1,6 +1,5 @@
 import { RouteRecordRaw } from "vue-router";
 import IndexPage from "../pages/IndexPage.vue";
-import AboutPage from "../pages/AboutPage.vue";
 
 /**
  * 路由列表
@@ -13,7 +12,16 @@ export default [
   },
   {
     path: "/about",
-    component: AboutPage,
+    component: () => import("../pages/AboutPage.vue"),
     props: true,
+  },
+  // 404页面
+  {
+    path: "/404",
+    component: () => import("../pages/404Page.vue"),
+  },
+  {
+    path: "/:pathMatch(.*)*",
+    redirect: "/404",
   },
 ] as RouteRecordRaw[];
