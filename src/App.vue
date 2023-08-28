@@ -17,7 +17,7 @@
         >
           <a-menu-item key="/about">About</a-menu-item>
           <a-menu-item key="/2">nav 2</a-menu-item>
-          <a-menu-item key="/3">nav 3</a-menu-item>
+          <a-menu-item key="/questions">问题列表</a-menu-item>
           <a-menu-item>
             <a href="https://github.com/htfc786/zzti-web" target="_blank">
               <github-outlined /> 代码开源

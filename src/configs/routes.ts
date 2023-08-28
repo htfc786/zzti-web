@@ -15,6 +15,11 @@ export default [
     component: () => import("../pages/AboutPage.vue"),
     props: true,
   },
+  {
+    path: "/questions",
+    component: () => import("../pages/QuestionsPage.vue"),
+    props: true,
+  },
   // 404页面
   {
     path: "/404",
