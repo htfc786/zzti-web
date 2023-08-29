@@ -16,6 +16,11 @@ export default [
     props: true,
   },
   {
+    path: "/random",
+    component: () => import("../pages/RandomPage.vue"),
+    props: true,
+  },
+  {
     path: "/questions",
     component: () => import("../pages/QuestionsPage.vue"),
     props: true,

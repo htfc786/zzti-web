@@ -26,7 +26,7 @@
 <script lang="ts" setup>
 import { ref, watchEffect } from 'vue'
 import type { MenuProps, ItemType } from 'ant-design-vue'
-import { getMenuObj, getPath } from '../core/questions'
+import { getMenuObj, getPathByMenuKey } from '../core/questions'
 import { getQuestionByPath } from '../questions'
 
 // 获取菜单元素对象
@@ -42,7 +42,7 @@ const handleClick: MenuProps['onClick'] = (e) => {
   if (!e.keyPath) {
     return
   }
-  questionPath.value = getPath(e.keyPath)
+  questionPath.value = getPathByMenuKey(e.keyPath)
 }
 
 // 当路径改变时重新获取题目

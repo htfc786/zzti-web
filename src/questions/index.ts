@@ -1,9 +1,9 @@
-import questionList from './questionList'
+import questionObj from './questions'
 import { isValidKey } from '../core/tools'
 
 /**
  * 根据传入题目对象返回题目列表
- * @param questionObj 问题对象，类似于questionList
+ * @param questionObj 问题对象，类似于questionObj对象
  * @return 题目列表
  */
 export const getQuestionByQuesObj = (questionObj: object): Array<string> => {
@@ -25,15 +25,17 @@ export const getQuestionByQuesObj = (questionObj: object): Array<string> => {
  * @return 题目列表
  */
 export const getQuestionByPath = (
-  pathList: Array<string>
-): Array<string> | null => {
-  var question = questionList
+  pathList: Array<string | null>
+): Array<string | null> | null => {
+  var question = questionObj
   for (var i = 0, len = pathList.length; i < len; i++) {
     const key = pathList[i]
-    if (!isValidKey(key, question)) {
-      return null
+    if (key) {
+      if (!isValidKey(key, question)) {
+        return null
+      }
+      question = question[key] 
     }
-    question = question[key]
   }
   // 是题目数组直接返回
   if (Array.isArray(question)) {
@@ -41,4 +43,16 @@ export const getQuestionByPath = (
   }
   // 不是题目数组
   return getQuestionByQuesObj(question)
+}
+
+/**
+ * 获取全部题目
+ * @return 全部题目列表
+ */
+export const getAllQuestion = (): Array<string | null> => {
+  const qRes = getQuestionByPath([]);
+  if (!qRes){
+    return [];
+  }
+  return qRes;
 }

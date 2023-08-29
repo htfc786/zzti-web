@@ -16,7 +16,7 @@
           @click="doClickMenu"
         >
           <a-menu-item key="/about">About</a-menu-item>
-          <a-menu-item key="/2">nav 2</a-menu-item>
+          <a-menu-item key="/random">抽题</a-menu-item>
           <a-menu-item key="/questions">问题列表</a-menu-item>
           <a-menu-item>
             <a href="https://github.com/htfc786/zzti-web" target="_blank">
@@ -43,6 +43,7 @@
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { GithubOutlined } from '@ant-design/icons-vue';
+import { isSupportedCssVariable } from './core/tools';
 
 const notes = ref<string>("数据更新日期 2023.8.27 17:44:16");
 
@@ -56,6 +57,11 @@ const changeContentMinHeight = () => {
   const content = <HTMLElement>document.querySelector(".content");
   const contentMinHeight = window.innerHeight - headerHeight - footerHeight;
   content.style.minHeight = contentMinHeight + "px";
+  if (isSupportedCssVariable()) {
+    const { marginTop: mt, marginBottom: mb } = window.getComputedStyle(content);
+    const allMargin = parseInt(mt, 10) + parseInt(mb, 10);
+    content.style.setProperty('--content-min-height', (contentMinHeight - allMargin) + "px");
+  }
 };
 
 const initChangeContentMinHeight = () => {
