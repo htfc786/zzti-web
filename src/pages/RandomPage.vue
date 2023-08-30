@@ -35,7 +35,7 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
 import type { TreeSelectProps } from 'ant-design-vue'
-import { TreeSelect } from 'ant-design-vue'
+import { TreeSelect, message } from 'ant-design-vue'
 import { randomOneQuestionByPathList } from '../core/random'
 import {
   getTreeDataByQues,
@@ -68,11 +68,14 @@ watch(
 const randQues = () => {
   isLoading.value = true
   setTimeout(() => {
+    isLoading.value = false
     const r_Question = randomOneQuestionByPathList(pathList)
     if (r_Question) {
       question.value = r_Question
+    } else {
+      question.value = ''
+      message.error('当前抽取范围不存在或没有题目！')
     }
-    isLoading.value = false
   }, 300)
 }
 

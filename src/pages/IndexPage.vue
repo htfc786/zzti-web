@@ -108,9 +108,15 @@ const randQues = () => {
   }
   isLoading.value = true
   setTimeout(() => {
+    isLoading.value = false
     // 等待。就是要那种感觉
     const r_Question = randomQuestionsByPathList(pathList, questionNum.value)
     if (r_Question) {
+      if (!r_Question.length) {
+        questionList.value = [];
+        message.error('当前抽取范围不存在或没有题目！')
+        return;
+      }
       if (r_Question.length < questionNum.value) {
         message.warning(
           '您要求的题目数量 大于 当前抽取范围全部的题目数量，已自动展示全部题目'
@@ -121,7 +127,6 @@ const randQues = () => {
       }
       questionList.value = r_Question
     }
-    isLoading.value = false
   }, 600)
 }
 

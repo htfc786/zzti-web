@@ -23,3 +23,6 @@ package-lock.json
 *.njsproj
 *.sln
 *.sw?
+
+# 题目信息文件
+src/questions/questions.ts
