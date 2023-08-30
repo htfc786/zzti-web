@@ -4,9 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --host 0.0.0.0",
-    "build": "vue-tsc && vite build",
-    "preview": "vite preview"
+    "dev": "node ./gen-quesobj.cjs && vite --host 0.0.0.0",
+    "build": "node ./gen-quesobj.cjs && vue-tsc && vite build",
+    "preview": "node ./gen-quesobj.cjs && vite preview",
+    "gen": "node ./gen-quesobj.cjs"
   },
   "dependencies": {
     "ant-design-vue": "^4.0.1",

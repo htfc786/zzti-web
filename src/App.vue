@@ -44,11 +44,12 @@ import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { GithubOutlined } from '@ant-design/icons-vue';
 import { isSupportedCssVariable } from './core/tools';
-
-const notes = ref<string>("数据更新日期 2023.8.27 17:44:16");
+import { questionNote } from './questions/questions';
 
 const route = useRoute();
 const router = useRouter();
+
+const notes = ref<string>(questionNote);
 
 // 使中间容器铺满
 const changeContentMinHeight = () => {
