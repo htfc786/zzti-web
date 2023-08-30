@@ -15,7 +15,7 @@
           :selected-keys="selectedKeys"
           @click="doClickMenu"
         >
-          <a-menu-item key="/about">About</a-menu-item>
+          <a-menu-item key="/index">默写</a-menu-item>
           <a-menu-item key="/random">抽题</a-menu-item>
           <a-menu-item key="/questions">问题列表</a-menu-item>
           <a-menu-item>

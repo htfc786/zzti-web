@@ -2,7 +2,7 @@
   <div class="random">
     <div class="select">
       <a-row type="flex" align="center">
-        <a-col style="margin-right: 8px;">抽题范围: </a-col>
+        <a-col style="margin-right: 8px">抽题范围: </a-col>
         <a-col flex="auto">
           <a-tree-select
             v-model:value="treeValue"
@@ -18,59 +18,67 @@
         </a-col>
       </a-row>
     </div>
-    <div class="question">  
+    <div class="question">
       <a-spin class="" size="large" :spinning="isLoading">
         <h1 :style="{ 'font-size': fontSize + 'px' }">{{ question }}</h1>
       </a-spin>
     </div>
     <div class="bottom">
       <fontResize v-model:value="fontSize" />
-      <a-button class="rand-btn" type="primary" size="large" @click="randQues()">再来一道</a-button>
+      <a-button class="rand-btn" type="primary" size="large" @click="randQues()"
+        >再来一道</a-button
+      >
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue'
 import type { TreeSelectProps } from 'ant-design-vue'
-import { TreeSelect } from 'ant-design-vue';
-import { randomOneQuestionByPathList } from '../core/random';
-import { getTreeDataByQues, getPathListByTreeValueList } from '../core/questions';
-import fontResize from '../components/fontResize.vue';
+import { TreeSelect } from 'ant-design-vue'
+import { randomOneQuestionByPathList } from '../core/random'
+import {
+  getTreeDataByQues,
+  getPathListByTreeValueList,
+} from '../core/questions'
+import fontResize from '../components/fontResize.vue'
 
 // 显示的问题
-const question = ref("")
+const question = ref('')
 // 是否处于加载中
-const isLoading = ref<boolean>(false);
+const isLoading = ref<boolean>(false)
 // 选择的范围
-const treeValue = ref<string[]>(["\\"]);
+const treeValue = ref<string[]>(['\\'])
 // 选择的字体大小
-const fontSize = ref<number>(40);
+const fontSize = ref<number>(40)
 
 // 加载选择范围数据
-const treeData: TreeSelectProps['treeData'] = getTreeDataByQues();
+const treeData: TreeSelectProps['treeData'] = getTreeDataByQues()
 // 路径列表
-var pathList: Array<Array<string | null>> = [[]];
+var pathList: Array<Array<string | null>> = [[]]
 
-watch(treeValue, () => {
-  pathList = getPathListByTreeValueList(treeValue.value);
-}, { immediate: true });
+watch(
+  treeValue,
+  () => {
+    pathList = getPathListByTreeValueList(treeValue.value)
+  },
+  { immediate: true }
+)
 
 const randQues = () => {
-  isLoading.value = true;
+  isLoading.value = true
   setTimeout(() => {
-    const r_Question = randomOneQuestionByPathList(pathList);
+    const r_Question = randomOneQuestionByPathList(pathList)
     if (r_Question) {
-      question.value = r_Question;
+      question.value = r_Question
     }
-    isLoading.value = false;
-  }, 300);
+    isLoading.value = false
+  }, 300)
 }
 
-onMounted(()=>{
-  randQues();
+onMounted(() => {
+  randQues()
 })
-
 </script>
 
 <style scoped>
@@ -96,6 +104,7 @@ onMounted(()=>{
 }
 .question h1 {
   margin: 0;
+  cursor: context-menu;
 }
 .bottom {
   display: flex;

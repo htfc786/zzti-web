@@ -7,23 +7,19 @@ import IndexPage from "../pages/IndexPage.vue";
 export default [
   {
     path: "/",
-    component: IndexPage,
-    props: true,
+    redirect: "/index",
   },
   {
-    path: "/about",
-    component: () => import("../pages/AboutPage.vue"),
-    props: true,
+    path: "/index",
+    component: IndexPage,
   },
   {
     path: "/random",
     component: () => import("../pages/RandomPage.vue"),
-    props: true,
   },
   {
     path: "/questions",
     component: () => import("../pages/QuestionsPage.vue"),
-    props: true,
   },
   // 404页面
   {

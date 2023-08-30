@@ -60,6 +60,9 @@ const reset = () => {
 </script>
 
 <style scoped>
+.font-resize {
+  font-size: 14px;
+}
 .font-resize .ant-btn {
   margin-right: 8px;
 }
