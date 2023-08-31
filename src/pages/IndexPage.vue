@@ -36,6 +36,8 @@
           >
         </a-col>
       </a-row>
+    </div>
+    <div style="display: flex;">
       <fontResize
         v-model:value="fontSize"
         :min="10"
@@ -43,6 +45,7 @@
         :default="28"
         :step="5"
       />
+      <a-button type="link" @click="isShow=!isShow">{{ isShow ? "收起" : "展开" }}</a-button>
     </div>
     <div class="question">
       <a-spin class="" size="large" :spinning="isLoading">
@@ -86,9 +89,11 @@ const treeValue = ref<string[]>(['\\'])
 // 随机到的题目列表信息
 const questionList = ref<Array<string | null>>([])
 // 随机到的题目数量
-const questionNum = ref<number>(2)
+const questionNum = ref<number>(5)
 // 字体大小
 const fontSize = ref<number>(28)
+// 是否显示面板
+const isShow = ref<boolean>(true)
 
 // 路径列表
 var pathList: Array<Array<string | null>> = [[]]
@@ -100,6 +105,15 @@ watch(
   },
   { immediate: true }
 )
+
+watch(isShow, ()=>{
+  const indexDom = <HTMLElement>document.querySelector(".index")
+  if (isShow.value) {
+    indexDom.classList.remove("select_hide")
+  } else {
+    indexDom.classList.add("select_hide")
+  }
+})
 
 const randQues = () => {
   if (questionNum.value == 1) {
@@ -143,6 +157,9 @@ const randQuesByNum = (num: number) => {
   justify-content: flex-start;
   align-items: stretch;
   min-height: var(--content-min-height);
+}
+.select_hide .select {
+  display: none;
 }
 .select .ant-row {
   align-items: center;

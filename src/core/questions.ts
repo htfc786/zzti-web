@@ -94,8 +94,6 @@ export const getMenuKeyByPath = (
       }
     }
   }
-  console.log(res_key);
-  
   return [res_key];
 }
 
