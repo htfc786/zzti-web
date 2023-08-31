@@ -1,5 +1,4 @@
 import { RouteRecordRaw } from "vue-router";
-import IndexPage from "../pages/IndexPage.vue";
 
 /**
  * 路由列表
@@ -11,7 +10,7 @@ export default [
   },
   {
     path: "/index",
-    component: IndexPage,
+    component: import("../pages/IndexPage.vue"),
   },
   {
     path: "/random",

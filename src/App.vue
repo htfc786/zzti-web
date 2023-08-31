@@ -1,11 +1,11 @@
 <template>
   <div class="main">
     <a-row class="header" type="flex" align="middle">
-      <a-col flex="100px" style="margin: 0 auto">
+      <a-col flex="200px" style="margin: 0 auto">
         <RouterLink to="/">
           <a-row align="middle">
             <img src="/vite.svg" alt="vite.svg" />
-            <span class="title">抽题</span>
+            <span class="title">Vite + Vue + TS</span>
           </a-row>
         </RouterLink>
       </a-col>
