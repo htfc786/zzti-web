@@ -10,7 +10,7 @@ export default [
   },
   {
     path: "/index",
-    component: import("../pages/IndexPage.vue"),
+    component: () => import("../pages/IndexPage.vue"),
   },
   {
     path: "/random",

@@ -72,14 +72,42 @@ export const getPathByMenuKey = (keyPath: Array<any>): Array<string> => {
 }
 
 /**
+ * 通过路径反查Menu key
+ * @param path 路径
+ * @param MenuObj Menu对象
+ * @returns Menu key
+ */
+export const getMenuKeyByPath = (
+  path: Array<string | null>,
+  MenuObj: Array<any>
+): Array<string> => {
+  var res = MenuObj;
+  var res_key: any = '';
+  for (var i = 0, len = path.length; i < len; i++) {
+    const key = path[i]
+    for (var j = 0, lenj = res.length; j < lenj; j++) {
+      if (res && !res[j]) { continue; }
+      if (res[j]?.label==key) {
+        res_key = res[j]?.key;
+        res = res[j]?.children;
+        break;
+      }
+    }
+  }
+  console.log(res_key);
+  
+  return [res_key];
+}
+
+/**
  * getTreeData 通过题目列表生成a-tree-select组件列表数据
  */
 export const getTreeData = (list: Object, lastKey: string | null = null) => {
   const resArray = []
   if (!lastKey) {
-    lastKey = "";
+    lastKey = ''
   } else {
-    lastKey = lastKey + "\\";
+    lastKey = lastKey + '\\'
   }
   for (const [key, value] of Object.entries(list)) {
     const itemKeyStr: string = lastKey + key
@@ -105,21 +133,25 @@ export const getTreeData = (list: Object, lastKey: string | null = null) => {
  * @return MenuObj
  */
 export const getTreeDataByQues = () => {
-  return [{
-    label: "全部题目",
-    value: "\\",
-    children: getTreeData(questionObj),
-  }];
+  return [
+    {
+      label: '全部题目',
+      value: '\\',
+      children: getTreeData(questionObj),
+    },
+  ]
 }
 
 export const getPathByTreeValue = (treeValue: string): Array<string> => {
-  if (treeValue == "\\") {
+  if (treeValue == '\\') {
     return []
   }
-  return treeValue.split("\\")
+  return treeValue.split('\\')
 }
 
-export const getPathListByTreeValueList = (treeValueList: Array<string>): Array<Array<string>> => {
+export const getPathListByTreeValueList = (
+  treeValueList: Array<string>
+): Array<Array<string>> => {
   const resList = []
   for (var i = 0, len = treeValueList.length; i < len; i++) {
     resList.push(getPathByTreeValue(treeValueList[i]))

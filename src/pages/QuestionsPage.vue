@@ -11,6 +11,7 @@
         style="width: 250px"
         mode="inline"
         :items="menuItems"
+        v-model:selectedKeys="selectedKeys"
         @click="handleClick"
       ></a-menu>
     </a-col>
@@ -26,12 +27,16 @@
 <script lang="ts" setup>
 import { ref, watchEffect } from 'vue'
 import type { MenuProps, ItemType } from 'ant-design-vue'
-import { getMenuObj, getPathByMenuKey } from '../core/questions'
+import {
+  getMenuKeyByPath,
+  getMenuObj,
+  getPathByMenuKey,
+} from '../core/questions'
 import { getQuestionByPath } from '../questions'
 
 // 获取菜单元素对象
 const menuItems: ItemType[] = getMenuObj()
-
+const selectedKeys = ref<string[]>([''])
 //题目列表信息
 const questionData = <any>ref([])
 // 题目路径
@@ -57,6 +62,7 @@ watchEffect(() => {
 
 const gotoPath = (path: Array<string | null>) => {
   questionPath.value = path
+  selectedKeys.value = getMenuKeyByPath(path, menuItems)
 }
 
 const gotoPathByIndex = (index: number) => {
@@ -68,6 +74,7 @@ const gotoPathByIndex = (index: number) => {
     res.push(questionPath.value[i])
   }
   questionPath.value = res
+  selectedKeys.value = getMenuKeyByPath(res, menuItems)
 }
 </script>
 
