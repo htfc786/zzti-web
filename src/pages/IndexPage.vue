@@ -64,17 +64,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import type { TreeSelectProps } from 'ant-design-vue'
 import { message, TreeSelect } from 'ant-design-vue'
+import { storeToRefs } from 'pinia'
+
 import fontResize from '../components/fontResize.vue'
 import {
   getPathListByTreeValueList,
   getTreeDataByQues,
 } from '../core/questions'
 import { randomQuestionsByPathList } from '../core/random'
+import { globalStore } from '../questions/globalStore.ts'
 
+const store = globalStore();
 const router = useRouter()
 
 // 加载选择范围数据
@@ -85,7 +89,7 @@ const numList = [1, 2, 3, 5, 10, 15, 20, 25, 50]
 // 是否处于加载中
 const isLoading = ref<boolean>(false)
 // 选择的范围
-const treeValue = ref<string[]>(['\\'])
+const treeValue = ref<any>(storeToRefs(store).savePathList_treeValue)
 // 随机到的题目列表信息
 const questionList = ref<Array<string | null>>([])
 // 随机到的题目数量
@@ -98,13 +102,9 @@ const isShow = ref<boolean>(true)
 // 路径列表
 var pathList: Array<Array<string | null>> = [[]]
 
-watch(
-  treeValue,
-  () => {
-    pathList = getPathListByTreeValueList(treeValue.value)
-  },
-  { immediate: true }
-)
+watch(treeValue, () => {
+  pathList = getPathListByTreeValueList(treeValue.value)
+}, { immediate: true })
 
 watch(isShow, ()=>{
   const indexDom = <HTMLElement>document.querySelector(".index")
@@ -148,6 +148,12 @@ const randQuesByNum = (num: number) => {
   questionNum.value = num
   randQues()
 }
+
+onMounted(() => {
+  if (store.savePathList_treeValue) {
+    message.info("已自动加载上次选择的抽题范围了")
+  }
+})
 </script>
 
 <style scoped>

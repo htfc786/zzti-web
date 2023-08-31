@@ -36,19 +36,24 @@
 import { onMounted, ref, watch } from 'vue'
 import type { TreeSelectProps } from 'ant-design-vue'
 import { TreeSelect, message } from 'ant-design-vue'
+import { storeToRefs } from 'pinia'
+
 import { randomOneQuestionByPathList } from '../core/random'
 import {
   getTreeDataByQues,
   getPathListByTreeValueList,
 } from '../core/questions'
 import fontResize from '../components/fontResize.vue'
+import { globalStore } from '../questions/globalStore.ts'
+
+const store = globalStore();
 
 // 显示的问题
 const question = ref('')
 // 是否处于加载中
 const isLoading = ref<boolean>(false)
 // 选择的范围
-const treeValue = ref<string[]>(['\\'])
+const treeValue = ref<any>(storeToRefs(store).savePathList_treeValue)
 // 选择的字体大小
 const fontSize = ref<number>(40)
 
@@ -57,13 +62,9 @@ const treeData: TreeSelectProps['treeData'] = getTreeDataByQues()
 // 路径列表
 var pathList: Array<Array<string | null>> = [[]]
 
-watch(
-  treeValue,
-  () => {
-    pathList = getPathListByTreeValueList(treeValue.value)
-  },
-  { immediate: true }
-)
+watch(treeValue, () => {
+  pathList = getPathListByTreeValueList(treeValue.value)
+}, { immediate: true })
 
 const randQues = () => {
   isLoading.value = true
@@ -81,6 +82,10 @@ const randQues = () => {
 
 onMounted(() => {
   randQues()
+
+  if (store.savePathList_treeValue) {
+    message.info("已自动加载上次选择的抽题范围了")
+  }
 })
 </script>
 
