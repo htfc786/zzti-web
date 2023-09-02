@@ -30,6 +30,7 @@
       <router-view />
     </div>
     <div class="footer">
+      <span><TJzk2024/></span>
       <span>备注：{{ notes }}</span>
       <span><a href="https://github.com/htfc786/zzti-web" target="_blank">zzti-web</a> - 帮政治老师开发的默写抽题系统 by htfc786</span>
       <span>前端代码感谢：<a href="https://github.com/liyupi/sql-mother" target="_blank">SQL之母</a> by 鱼皮</span>
@@ -45,6 +46,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { GithubOutlined } from '@ant-design/icons-vue';
 import { isSupportedCssVariable } from './core/tools';
 import { questionNote } from './questions/questions';
+import TJzk2024 from './components/2024TJzk.vue';
 
 const route = useRoute();
 const router = useRouter();
