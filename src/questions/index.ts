@@ -56,3 +56,22 @@ export const getAllQuestion = (): Array<string | null> => {
   }
   return qRes;
 }
+
+/**
+ * 判断路径是否存在
+ * @param pathList 路径
+ * @returns 是否存在
+ */
+export const isQuestionPathExist = (path: Array<string | null>): boolean => {
+  var question = questionObj
+  for (var i = 0, len = path.length; i < len; i++) {
+    const key = path[i]
+    if (key) {
+      if (!isValidKey(key, question)) {
+        return false
+      }
+      question = question[key] 
+    }
+  }
+  return true;
+}

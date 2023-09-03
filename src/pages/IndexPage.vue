@@ -68,15 +68,16 @@ import { onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import type { TreeSelectProps } from 'ant-design-vue'
 import { message, TreeSelect } from 'ant-design-vue'
-import { storeToRefs } from 'pinia'
 
 import fontResize from '../components/fontResize.vue'
 import {
-  getPathListByTreeValueList,
   getTreeDataByQues,
+  getPathListByTreeValueList,
+  getTreeValueListByPathList,
+  checkPathList,
 } from '../core/questions'
 import { randomQuestionsByPathList } from '../core/random'
-import { globalStore } from '../questions/globalStore.ts'
+import { globalStore } from '../core/globalStore.ts'
 
 const store = globalStore();
 const router = useRouter()
@@ -89,7 +90,7 @@ const numList = [1, 2, 3, 5, 10, 15, 20, 25, 50]
 // 是否处于加载中
 const isLoading = ref<boolean>(false)
 // 选择的范围
-const treeValue = ref<any>(storeToRefs(store).savePathList_treeValue)
+const treeValue = ref<Array<string>>(["\\"])
 // 随机到的题目列表信息
 const questionList = ref<Array<string | null>>([])
 // 随机到的题目数量
@@ -105,6 +106,12 @@ var pathList: Array<Array<string | null>> = [[]]
 watch(treeValue, () => {
   pathList = getPathListByTreeValueList(treeValue.value)
 }, { immediate: true })
+
+watch(treeValue, () => {
+  //保存历史记录
+  store.history.mode = "path"
+  store.history.data = pathList
+})
 
 watch(isShow, ()=>{
   const indexDom = <HTMLElement>document.querySelector(".index")
@@ -149,10 +156,31 @@ const randQuesByNum = (num: number) => {
   randQues()
 }
 
-onMounted(() => {
-  if (store.savePathList_treeValue) {
+const loadHistory = () => {
+  let history = store.history
+  if (!history.data) {
+    return;
+  } else if (history.mode == "path") {
+    const { pathList: newPathList, error, del } = checkPathList(history.data)
+    if (error) {
+      // 错误
+      if (del) {
+        const msg = `不存在的路径 ${del.join(", ")} ，已自动删除`
+        message.warn(msg)
+      }
+      history.data = newPathList;
+    }
+    if (history.data.length == 0){
+      return;
+    }
+    pathList = history.data
+    treeValue.value = getTreeValueListByPathList(history.data)
     message.info("已自动加载上次选择的抽题范围了")
   }
+}
+
+onMounted(() => {
+  loadHistory()
 })
 </script>
 
@@ -183,3 +211,4 @@ onMounted(() => {
   cursor: context-menu;
 }
 </style>
+../core/globalStore.ts

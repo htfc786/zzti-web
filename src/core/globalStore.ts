@@ -4,7 +4,10 @@ export const globalStore = defineStore("saveLevel", {
   state: () => {
     //数据
     return {
-      savePathList_treeValue: ['\\'],
+      history: {
+        mode: "path",
+        data: <Array<Array<string | null>> | null>null
+      },
     };
   },
   actions: {
