@@ -32,6 +32,23 @@ export const randomOneQuestionByPathList = (
 }
 
 /**
+ * 根据数组下标获取一道题
+ * @param pathList 路径列表
+ * @param index 数组下标
+ */
+export const getOneQuestionByIndex = (
+  pathList: Array<Array<string | null>>,
+  index: number
+): string | null => {
+  var resList: Array<any> = []
+  for (var i = 0, len = pathList.length; i < len; i++) {
+    const qList = getQuestionByPath(pathList[i])
+    resList = resList.concat(qList)
+  }
+  return resList[index];
+}
+
+/**
  * 根据题目列表随机n道题
  * @param questionList 题目列表
  * @returns 题目

@@ -17,6 +17,7 @@
           />
         </a-col>
       </a-row>
+      <a-switch v-model:checked="isOrder" /> 顺序抽题
     </div>
     <div class="question">
       <a-spin class="" size="large" :spinning="isLoading">
@@ -37,7 +38,10 @@ import { onMounted, ref, watch } from 'vue'
 import type { TreeSelectProps } from 'ant-design-vue'
 import { TreeSelect, message } from 'ant-design-vue'
 
-import { randomOneQuestionByPathList } from '../core/random'
+import {
+  randomOneQuestionByPathList,
+  getOneQuestionByIndex, 
+} from '../core/random'
 import {
   getTreeDataByQues,
   getPathListByTreeValueList,
@@ -57,11 +61,15 @@ const isLoading = ref<boolean>(false)
 const treeValue = ref<Array<string>>(["\\"])
 // 选择的字体大小
 const fontSize = ref<number>(40)
+// 是否按顺序
+const isOrder = ref<boolean>(false)
 
 // 加载选择范围数据
 const treeData: TreeSelectProps['treeData'] = getTreeDataByQues()
 // 路径列表
 var pathList: Array<Array<string | null>> = [[]]
+// 路径列表
+var orderIndex: number = 0
 
 watch(treeValue, () => {
   pathList = getPathListByTreeValueList(treeValue.value)
@@ -73,10 +81,37 @@ watch(treeValue, () => {
   store.history.data = pathList
 })
 
+watch(isOrder, () => {
+  orderIndex = 0
+})
+
+const orderQues = () => {
+  const r_Question = getOneQuestionByIndex(pathList, orderIndex)
+  if (!r_Question) {
+    orderIndex = 0
+    const rs_Question = getOneQuestionByIndex(pathList, orderIndex)
+    if (!rs_Question) {
+      question.value = ''
+      message.error('当前抽取范围不存在或没有题目！')
+      return;
+    }
+    question.value = rs_Question
+    message.info('当前抽取范围的题目已经全部抽取完毕，已自动重置')
+    orderIndex++
+    return;
+  } 
+  question.value = r_Question
+  orderIndex++
+}
+
 const randQues = () => {
   isLoading.value = true
   setTimeout(() => {
     isLoading.value = false
+    if (isOrder.value) {
+      orderQues()
+      return;
+    }
     const r_Question = randomOneQuestionByPathList(pathList)
     if (r_Question) {
       question.value = r_Question
