@@ -24,4 +24,4 @@ pinia.use(piniaPluginPersistedstate);
 createApp(App).use(router).use(pinia).use(Antd).mount('#app')
 
 // 关闭loading
-document.querySelector(".isloading").classList.remove("isloading")
+document.querySelector(".isloading")?.classList.remove("isloading")
