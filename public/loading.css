@@ -1,0 +1,93 @@
+/* https://www.antdv.com/components/spin-cn */
+/* Ant Design Vue */
+#loading {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  display: none;
+}
+.isloading {
+  display: block !important;
+}
+.ant-spin {
+  display: block;
+  position: absolute;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  max-height: 400px;
+  top: 0;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  z-index: 4;
+  line-height: 1.5714285714285714;
+  font-size: 14px;
+  color: #1677ff;
+  inset-inline-start: 0;
+  transition: transform 0.3s cubic-bezier(0.78, 0.14, 0.15, 0.86);
+}
+.ant-spin .text {
+  position: absolute;
+  width: 100%;
+  top: 50%;
+  padding-top: 5px;
+  text-shadow: 0 1px 2px #ffffff;
+}
+.ant-spin .dot {
+  display: inline-block;
+  position: absolute;
+  width: 1em;
+  height: 1em;
+  top: 50%;
+  font-size: 20px;
+  margin: -20px -10px -10px -10px;
+  transform: rotate(45deg);
+  inset-inline-start: 50%;
+  animation-name: css-kqecok-antRotate;
+  animation-duration: 1.2s;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}
+.ant-spin .dot i {
+  position: absolute;
+  display: block;
+  width: 9px;
+  height: 9px;
+  background-color: #1677ff;
+  border-radius: 100%;
+  transform: scale(0.75);
+  transform-origin: 50% 50%;
+  opacity: 0.3;
+  animation: css-kqecok-antSpinMove 1s infinite linear alternate;
+}
+.ant-spin .dot i:nth-child(1) {
+  top: 0;
+  inset-inline-start: 0;
+}
+.ant-spin .dot i:nth-child(2) {
+  top: 0;
+  inset-inline-end: 0;
+  animation-delay: 0.4s;
+}
+.ant-spin .dot i:nth-child(3) {
+  inset-inline-end: 0;
+  bottom: 0;
+  animation-delay: 0.8s;
+}
+.ant-spin .dot i:nth-child(4) {
+  bottom: 0;
+  inset-inline-start: 0;
+  animation-delay: 1.2s;
+}
+@keyframes css-kqecok-antRotate {
+  to {
+    transform: rotate(405deg);
+  }
+}
+@keyframes css-kqecok-antSpinMove {
+  to {
+    opacity: 1;
+  }
+}

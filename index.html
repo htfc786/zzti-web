@@ -5,9 +5,16 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite + Vue + TS</title>
+    <link href="/loading.css" rel="stylesheet">
   </head>
   <body>
     <div id="app"></div>
+    <div id="loading" class="isloading">
+      <div class="ant-spin">
+        <span class="dot"><i></i><i></i><i></i><i></i></span>
+        <div class="text">Loading...</div>
+      </div>
+    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
