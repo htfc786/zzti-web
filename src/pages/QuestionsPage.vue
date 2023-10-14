@@ -102,13 +102,13 @@ const gotoPathByIndex = (index: number) => {
   background-color: #000 !important;
   color: #fff !important
 }
-.dark .ant-menu::v-deep .ant-menu-item-selected {
+.dark .ant-menu :deep(.ant-menu-item-selected) {
   background-color: #333 !important;
 }
-.dark .ant-menu::v-deep .ant-menu-submenu-title:hover {
+.dark .ant-menu :deep(.ant-menu-submenu-title:hover) {
   color: rgba(255, 255, 255, 0.88);
 }
-.dark .ant-breadcrumb::v-deep .ant-breadcrumb-separator {
+.dark .ant-breadcrumb :deep(.ant-breadcrumb-separator) {
   color: rgba(255, 255, 255, 0.45);
 }
 </style>
