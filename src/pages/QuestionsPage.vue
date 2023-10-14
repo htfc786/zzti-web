@@ -1,8 +1,8 @@
 <template>
   <a-breadcrumb>
-    <a-breadcrumb-item><a @click="gotoPath([])">全部题目</a></a-breadcrumb-item>
+    <a-breadcrumb-item><a @click="gotoPath([])" class="d-item">全部题目</a></a-breadcrumb-item>
     <a-breadcrumb-item v-for="(path, index) in questionPath">
-      <a @click="gotoPathByIndex(index)">{{ path }}</a>
+      <a @click="gotoPathByIndex(index)" class="d-item">{{ path }}</a>
     </a-breadcrumb-item>
   </a-breadcrumb>
   <a-row type="flex" align="start">
@@ -18,7 +18,9 @@
     <a-col flex="auto">
       <a-list item-layout="horizontal" :data-source="questionData">
         <template #renderItem="{ item, index }">
-          <a-list-item>{{ index + 1 }}、{{ item }}</a-list-item>
+          <a-list-item>
+            <span class="d-item">{{ index + 1 }}、{{ item }}</span>
+          </a-list-item>
         </template>
       </a-list>
     </a-col>
@@ -82,5 +84,23 @@ const gotoPathByIndex = (index: number) => {
 .ant-breadcrumb {
   margin-left: 25px;
   margin-bottom: 10px;
+}
+/* 夜间模式样式 */
+.dark .d-item {
+  background-color: #000 !important;
+  color: #fff !important
+}
+.dark .ant-menu {
+  background-color: #000 !important;
+  color: #fff !important
+}
+.dark .ant-menu::v-deep .ant-menu-item-selected {
+  background-color: #333 !important;
+}
+.dark .ant-menu::v-deep .ant-menu-submenu-title:hover {
+  color: rgba(255, 255, 255, 0.88);
+}
+.dark .ant-breadcrumb::v-deep .ant-breadcrumb-separator {
+  color: rgba(255, 255, 255, 0.45);
 }
 </style>

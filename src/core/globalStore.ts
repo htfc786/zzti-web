@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 
-export const globalStore = defineStore("saveLevel", {
+export const globalStore = defineStore("zzti_globalStore", {
   state: () => {
     //数据
     return {
@@ -8,6 +8,7 @@ export const globalStore = defineStore("saveLevel", {
         mode: "path",
         data: <Array<Array<string | null>> | null>null
       },
+      dark_mode: false, 
     };
   },
   actions: {

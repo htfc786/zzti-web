@@ -52,7 +52,7 @@
         <a-list item-layout="horizontal" :data-source="questionList">
           <template #renderItem="{ item, index }">
             <a-list-item>
-              <h1 :style="{ 'font-size': fontSize + 'px' }">
+              <h1 class="d-item" :style="{ 'font-size': fontSize + 'px' }">
                 {{ index + 1 }}、{{ item }}
               </h1>
             </a-list-item>
@@ -210,5 +210,10 @@ onMounted(() => {
   margin: 0;
   cursor: context-menu;
 }
+
+/* 夜间模式样式 */
+.dark .d-item {
+  background-color: #000 !important;
+  color: #fff !important
+}
 </style>
-../core/globalStore.ts

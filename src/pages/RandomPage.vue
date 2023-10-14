@@ -185,4 +185,3 @@ onMounted(() => {
   align-items: center;
 }
 </style>
-../core/globalStore.ts
