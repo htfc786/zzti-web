@@ -10,10 +10,10 @@
 }
 
 /* 夜间模式样式 */
-.dark .ant-result::v-deep .ant-result-title {
+.dark .ant-result :deep(.ant-result-title) {
   color: rgba(255, 255, 255, 0.88);
 }
-.dark .ant-result::v-deep .ant-result-subtitle {
+.dark .ant-result :deep(.ant-result-subtitle) {
   color: rgba(255, 255, 255, 0.45);
 }
 </style>
