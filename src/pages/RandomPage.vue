@@ -21,14 +21,22 @@
     </div>
     <div class="question">
       <a-spin class="" size="large" :spinning="isLoading">
-        <h1 :style="{ 'font-size': fontSize + 'px' }">{{ question }}</h1>
+        <h1 :style="{ 'font-size': fontSize + 'px' }">{{ question.q }}</h1>
       </a-spin>
     </div>
     <div class="bottom">
       <fontResize v-model:value="fontSize" />
-      <a-button class="rand-btn" type="primary" size="large" @click="randQues()"
-        >再来一道</a-button
-      >
+      <div class="btn-area">
+        <a-popover title="答案查看" trigger="click" placement="top">
+          <template #content>
+            <span class="ans-text">{{ question.ans ? question.ans : "无" }}</span>
+          </template>
+          <a-button class="ans-btn" size="small">答案</a-button>
+        </a-popover>
+        <a-button class="rand-btn" type="primary" size="large" @click="randQues()"
+          >再来一道</a-button
+        >
+      </div>
     </div>
   </div>
 </template>
@@ -54,7 +62,7 @@ import { globalStore } from '../core/globalStore.ts'
 const store = globalStore();
 
 // 显示的问题
-const question = ref('')
+const question = ref<any>({q: ""})
 // 是否处于加载中
 const isLoading = ref<boolean>(false)
 // 选择的范围
@@ -165,10 +173,20 @@ onMounted(() => {
   align-items: center;
   margin-bottom: 8px;
 }
+.bottom .btn-area {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
 .random .rand-btn {
   width: 150px;
   height: 60px;
   font-size: 25px;
+}
+.random .ans-btn {
+  height: 30px;
+  margin-right: 8px;
+  font-size: 15px;
 }
 .question {
   align-self: center;
@@ -183,5 +201,8 @@ onMounted(() => {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+}px
+.ans-text {
+  max-width: 200px;
 }
 </style>

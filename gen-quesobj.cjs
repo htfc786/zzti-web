@@ -46,18 +46,42 @@ function getObj(path) {
         file_list.pop();
         const name = file_list.join(".");
         //读取文件
-        const data = fs.readFileSync(itemPath, fileEncoding);
+        const data_text = fs.readFileSync(itemPath, fileEncoding);
         //按行分割
-        const add_list = data.toString().split("\n");
-        //循环遍历每一行
+        const data = data_text.toString().split("\n");
+        //结果
         var fileResult = "[";
-        for (i = 0; i < add_list.length; i++) {
-          // 替换违法字符 
-          var add_res = replaceText(add_list[i]);
-          //空行
-          if (!add_res) { continue } 
-          //加入结果
-          fileResult += `"${add_res}", `;
+        //是否存在答案 /#(.*?)answer(.*?)=(.*?)true(.*?)/ 
+        if (/#(.*?)answer(.*?)=(.*?)true(.*?)/.test(data[0])) {
+          // 答案模式
+          for (var i = 1; i < data.length; i+=2) {
+            // 问题
+            var question = replaceText(data[i]);
+            if (!question) { i--; continue; } //空行
+            //答案
+            var answer_raw = data[i+1] ? data[i+1] : ""; //预处理
+            var answer = replaceText(answer_raw);
+            if (!answer) { // 可能无答案
+              //按普通题目完成添加
+              // console.log("题目",question,"答案 无");
+              // fileResult += `"${question}", `;
+              fileResult += `{q: "${question}"}, `;
+              continue;
+            } 
+            // console.log("题目",question,"答案",answer);
+            fileResult += `{q: "${question}", ans: "${answer}"}, `;
+          }
+        } else {
+          // 普通模式
+          for (i = 0; i < data.length; i++) {
+            // 替换违法字符 
+            var add_res = replaceText(data[i]);
+            //空行
+            if (!add_res) { continue } 
+            //加入结果
+            // fileResult += `"${add_res}", `;
+            fileResult += `{q: "${add_res}"}, `;
+          }
         }
         fileResult += "]";
         // 加入总结果
