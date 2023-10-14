@@ -35,30 +35,38 @@
       <span><a href="https://github.com/htfc786/zzti-web" target="_blank">zzti-web</a> - 帮政治老师开发的默写抽题系统 by htfc786</span>
       <span>前端代码感谢：<a href="https://github.com/liyupi/sql-mother" target="_blank">SQL之母</a> by 鱼皮</span>
       <span>本站使用Github搭建</span>
+      <span><a-switch v-model:checked="dark_mode" />夜间模式</span>
     </div>
   </div>
   <a-back-top :style="{ right: '24px' }" />
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { GithubOutlined } from '@ant-design/icons-vue';
+import { storeToRefs } from 'pinia'
+
+import { globalStore } from './core/globalStore.ts'
 import { isSupportedCssVariable } from './core/tools';
 import { questionNote } from './questions/questions';
 import TJzk2024 from './components/2024TJzk.vue';
 
+const store = globalStore();
 const route = useRoute();
 const router = useRouter();
 
 const notes = ref<string>(questionNote);
+
+//夜间模式
+const dark_mode = storeToRefs(store).dark_mode;
 
 // 使中间容器铺满
 const changeContentMinHeight = () => {
   const headerHeight = (<HTMLElement>document.querySelector(".header"))?.offsetHeight;
   const footerHeight = (<HTMLElement>document.querySelector(".footer"))?.offsetHeight;
   const content = <HTMLElement>document.querySelector(".content");
-  const contentMinHeight = window.innerHeight - headerHeight - footerHeight;
+  const contentMinHeight = window.innerHeight - headerHeight - footerHeight + 22;
   content.style.minHeight = contentMinHeight + "px";
   if (isSupportedCssVariable()) {
     const { marginTop: mt, marginBottom: mb } = window.getComputedStyle(content);
@@ -96,6 +104,14 @@ const doClickMenu = ({ key }: any) => {
   }
 };
 
+// 夜间模式切换
+watch(dark_mode, ()=>{
+  if (dark_mode.value) {
+    document.body.classList.add("dark")
+  } else {
+    document.body.classList.remove("dark")
+  }
+}, { immediate: true });
 </script>
 
 <style scoped>
@@ -126,5 +142,15 @@ const doClickMenu = ({ key }: any) => {
   display: block;
   margin: 0;
 }
-
+body.dark {
+  background-color: #000 !important;
+  color: #fff !important;
+}
+body.dark * {
+  background-color: #000 !important;
+  color: #fff !important;
+}
+.dark .ant-list-item {
+  color: #fff !important;
+}
 </style>
