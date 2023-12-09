@@ -20,9 +20,7 @@
       <a-row type="flex" align="center" class="q-num">
         <a-col>题目数量: </a-col>
         <a-col v-for="num in numList">
-          <a-button size="small" @click="randQuesByNum(num)">{{
-            num
-          }}</a-button>
+          <a-button size="small" @click="randQuesByNum(num)">{{ num }}</a-button>
         </a-col>
         <a-col>
           <a-button size="small" @click="randQuesByNum(0)">全部</a-button>
@@ -31,9 +29,7 @@
           <a-input-number v-model:value="questionNum" :min="1" />
         </a-col>
         <a-col>
-          <a-button type="primary" size="large" @click="randQues()"
-            >生成！</a-button
-          >
+          <a-button type="primary" size="large" @click="randQues()">生成！</a-button >
         </a-col>
       </a-row>
     </div>
@@ -53,7 +49,7 @@
           <template #renderItem="{ item, index }">
             <a-list-item>
               <h1 class="d-item" :style="{ 'font-size': fontSize + 'px' }">
-                {{ index + 1 }}、{{ item }}
+                {{ index + 1 }}、{{ item.q }}
               </h1>
             </a-list-item>
           </template>
@@ -109,7 +105,6 @@ watch(treeValue, () => {
 
 watch(treeValue, () => {
   //保存历史记录
-  store.history.mode = "path"
   store.history.data = pathList
 })
 
@@ -160,23 +155,22 @@ const loadHistory = () => {
   let history = store.history
   if (!history.data) {
     return;
-  } else if (history.mode == "path") {
-    const { pathList: newPathList, error, del } = checkPathList(history.data)
-    if (error) {
-      // 错误
-      if (del) {
-        const msg = `不存在的路径 ${del.join(", ")} ，已自动删除`
-        message.warn(msg)
-      }
-      history.data = newPathList;
-    }
-    if (history.data.length == 0){
-      return;
-    }
-    pathList = history.data
-    treeValue.value = getTreeValueListByPathList(history.data)
-    message.info("已自动加载上次选择的抽题范围了")
   }
+  const { pathList: newPathList, error, del } = checkPathList(history.data)
+  if (error) {
+    // 错误
+    if (del) {
+      message.warn(`不存在的路径 ${del.join(", ")} ，已自动从历史记录中删除`)
+    }
+    history.data = newPathList;
+  }
+  
+  if (history.data.length == 0){
+    return;
+  }
+  pathList = history.data
+  treeValue.value = getTreeValueListByPathList(history.data)
+  message.info("已自动加载上次选择的抽题范围了")
 }
 
 onMounted(() => {

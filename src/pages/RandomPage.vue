@@ -18,6 +18,7 @@
         </a-col>
       </a-row>
       <a-switch v-model:checked="isOrder" /> 顺序抽题
+      <a-switch v-model:checked="isNoRepeat" /> 防止重复
     </div>
     <div class="question">
       <a-spin class="" size="large" :spinning="isLoading">
@@ -27,12 +28,17 @@
     <div class="bottom">
       <fontResize v-model:value="fontSize" />
       <div class="btn-area">
-        <a-popover title="答案查看" trigger="click" placement="top">
-          <template #content>
-            <span class="ans-text">{{ question.ans ? question.ans : "无" }}</span>
-          </template>
-          <a-button class="ans-btn" size="small">答案</a-button>
-        </a-popover>
+        <template v-if="question.ans">
+          <a-popover title="答案查看" trigger="click" placement="top">
+            <template #content>
+              <span class="ans-text">{{ question.ans }}</span>
+            </template>
+            <a-button class="ans-btn" size="small">答案</a-button>
+          </a-popover>
+        </template>
+        <template v-else>
+          <a-button class="ans-btn" size="small" disabled>答案</a-button>
+        </template>
         <a-button class="rand-btn" type="primary" size="large" @click="randQues()"
           >再来一道</a-button
         >
@@ -48,7 +54,8 @@ import { TreeSelect, message } from 'ant-design-vue'
 
 import {
   randomOneQuestionByPathList,
-  getOneQuestionByIndex, 
+  getOneQuestionByIndex,
+  randomOneQuestion, 
 } from '../core/random'
 import {
   getTreeDataByQues,
@@ -56,6 +63,7 @@ import {
   getTreeValueListByPathList,
   checkPathList,
 } from '../core/questions'
+import { getQuestionByPathList } from '../questions'
 import fontResize from '../components/fontResize.vue'
 import { globalStore } from '../core/globalStore.ts'
 
@@ -71,26 +79,58 @@ const treeValue = ref<Array<string>>(["\\"])
 const fontSize = ref<number>(40)
 // 是否按顺序
 const isOrder = ref<boolean>(false)
+// 是否防止重复
+const isNoRepeat = ref<boolean>(false)
 
 // 加载选择范围数据
 const treeData: TreeSelectProps['treeData'] = getTreeDataByQues()
 // 路径列表
 var pathList: Array<Array<string | null>> = [[]]
-// 路径列表
+// 按顺序模式中的 index
 var orderIndex: number = 0
+// 否防止重复模式中的题目列表
+let noRepQuesList: Array<string|null> | null = null;
 
+// 重选抽题范围时自动修改路径列表
 watch(treeValue, () => {
   pathList = getPathListByTreeValueList(treeValue.value)
+  // 防止重复模式中的题目列表题目列表清空
+  noRepQuesList = null
 }, { immediate: true })
 
 watch(treeValue, () => {
   //保存历史记录
-  store.history.mode = "path"
   store.history.data = pathList
 })
 
+// 排序记录清零
 watch(isOrder, () => {
   orderIndex = 0
+  // 防止防止重复模式和按顺序模式同时开启
+  if (isNoRepeat.value && isOrder.value) {
+    isNoRepeat.value = false
+  }
+  // 保存历史记录
+  if (isOrder.value) {
+    store.oneQuesMode = "order";
+  } else if (!isNoRepeat.value && !isOrder.value) {
+    store.oneQuesMode = "null";
+  }
+})
+
+// 防止重复模式中的题目列表题目列表清空
+watch(isNoRepeat, () => {
+  noRepQuesList = null
+  // 防止防止重复模式和按顺序模式同时开启
+  if (isNoRepeat.value && isOrder.value) {
+    isOrder.value = false
+  }
+  // 保存历史记录
+  if (isNoRepeat.value) {
+    store.oneQuesMode = "noRepeat";
+  } else if (!isNoRepeat.value && !isOrder.value) {
+    store.oneQuesMode = "null";
+  }
 })
 
 const orderQues = () => {
@@ -112,14 +152,40 @@ const orderQues = () => {
   orderIndex++
 }
 
+const noRepeatQues = ()=>{
+  if (noRepQuesList === null) {
+    noRepQuesList = getQuestionByPathList(pathList)
+  }
+  if (noRepQuesList && noRepQuesList.length === 0) {
+    question.value = ''
+    message.info('所有题目全部抽取完毕，自动重置')
+    noRepQuesList = getQuestionByPathList(pathList)
+  }
+  if (!noRepQuesList) {//如果还是没有，宣告没有题目
+    question.value = ''
+    message.error('当前抽取范围不存在或没有题目！')
+    return;
+  }
+  const ques = randomOneQuestion(noRepQuesList);
+  question.value = ques;
+  //从抽取列表中删除
+  noRepQuesList = noRepQuesList.filter(item => item !== ques)
+}
+
+// 随机抽取题目
 const randQues = () => {
   isLoading.value = true
   setTimeout(() => {
     isLoading.value = false
-    if (isOrder.value) {
+    if (isOrder.value) {  //顺序
       orderQues()
       return;
     }
+    if (isNoRepeat.value) {  //防止重复
+      noRepeatQues()
+      return;
+    }
+    // 正常抽取
     const r_Question = randomOneQuestionByPathList(pathList)
     if (r_Question) {
       question.value = r_Question
@@ -135,28 +201,40 @@ const loadHistory = () => {
   let history = store.history
   if (!history.data) {
     return;
-  } else if (history.mode == "path") {
-    const { pathList: newPathList, error, del } = checkPathList(history.data)
-    if (error) {
-      // 错误
-      if (del) {
-        const msg = `不存在的路径 ${del.join(", ")} ，已自动删除`
-        message.warn(msg)
-      }
-      history.data = newPathList;
+  } 
+  const { pathList: newPathList, error, del } = checkPathList(history.data)
+  if (error) {
+    // 错误
+    if (del) {
+      message.warn(`不存在的路径 ${del.join(", ")} ，已自动从历史记录中删除`)
     }
-    if (history.data.length == 0){
-      return;
-    }
-    pathList = history.data
-    treeValue.value = getTreeValueListByPathList(history.data)
-    message.info("已自动加载上次选择的抽题范围了")
+    history.data = newPathList;
+  }
+  if (history.data.length == 0){
+    return;
+  }
+  pathList = history.data
+  treeValue.value = getTreeValueListByPathList(history.data)
+  message.info("已自动加载上次选择的抽题范围了")
+}
+
+// 加载历史模式
+const loadHistoryMode = () => {
+  if (!store.oneQuesMode) {
+    return;
+  }
+  switch (store.oneQuesMode) {
+    case "order": isOrder.value = true; break;
+    case "noRepeat": isNoRepeat.value = true; break;
+    default: break;
   }
 }
 
 onMounted(() => {
+  // 加载历史记录
+  loadHistoryMode()
   loadHistory()
-
+  // 自动抽取题目
   randQues()
 })
 </script>

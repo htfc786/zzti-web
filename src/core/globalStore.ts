@@ -5,10 +5,10 @@ export const globalStore = defineStore("zzti_globalStore", {
     //数据
     return {
       history: {
-        mode: "path",
         data: <Array<Array<string | null>> | null>null
       },
       dark_mode: false, 
+      oneQuesMode: <string>"null"
     };
   },
   actions: {

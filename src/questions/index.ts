@@ -44,6 +44,16 @@ export const getQuestionByPath = (
   // 不是题目数组
   return getQuestionByQuesObj(question)
 }
+export const getQuestionByPathList = (
+  pathList: Array<Array<string | null>>
+): Array<string | null> | null => {
+  var resList: Array<any> = []
+  for (var i = 0, len = pathList.length; i < len; i++) {
+    const qList = getQuestionByPath(pathList[i])
+    resList = resList.concat(qList)
+  }
+  return resList
+};
 
 /**
  * 获取全部题目
