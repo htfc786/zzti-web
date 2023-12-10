@@ -17,8 +17,15 @@
           />
         </a-col>
       </a-row>
-      <a-switch v-model:checked="isOrder" /> 顺序抽题
-      <a-switch v-model:checked="isNoRepeat" /> 防止重复
+      <a-row type="flex" align="left">
+        <a-col style="margin-right: 8px">
+          <a-switch v-model:checked="isNoRepeat" /> 防止重复
+          <a-button v-if="isNoRepeat" @click="noRepeatReadd" size="small">重加</a-button>
+        </a-col>
+        <a-col>
+          <a-switch v-model:checked="isOrder" /> 顺序模式
+        </a-col>
+      </a-row>
     </div>
     <div class="question">
       <a-spin class="" size="large" :spinning="isLoading">
@@ -39,9 +46,7 @@
         <template v-else>
           <a-button class="ans-btn" size="small" disabled>答案</a-button>
         </template>
-        <a-button class="rand-btn" type="primary" size="large" @click="randQues()"
-          >再来一道</a-button
-        >
+        <a-button class="rand-btn" type="primary" size="large" @click="randQues()">再来一道</a-button>
       </div>
     </div>
   </div>
@@ -152,7 +157,7 @@ const orderQues = () => {
   orderIndex++
 }
 
-const noRepeatQues = ()=>{
+const noRepeatQues = () => {
   if (noRepQuesList === null) {
     noRepQuesList = getQuestionByPathList(pathList)
   }
@@ -170,6 +175,20 @@ const noRepeatQues = ()=>{
   question.value = ques;
   //从抽取列表中删除
   noRepQuesList = noRepQuesList.filter(item => item !== ques)
+}
+
+// 防止重复模式题目重添加
+const noRepeatReadd = () => {
+  if (!isNoRepeat.value || !noRepQuesList) {
+    return;
+  }
+  // 一道题只添加一次
+  if (noRepQuesList.indexOf(question.value) > -1) {
+    message.error('禁止重复添加！！！')
+    return;
+  }
+  noRepQuesList.push(question.value)
+  message.info('当前题目重新已添加到题目列表中')
 }
 
 // 随机抽取题目
