@@ -29,7 +29,8 @@
     </div>
     <div class="question">
       <a-spin class="" size="large" :spinning="isLoading">
-        <h1 :style="{ 'font-size': fontSize + 'px' }">{{ question.q }}</h1>
+        <h1 v-if="question.q" :style="{ 'font-size': fontSize + 'px' }">{{ question.q }}</h1>
+        <a-button v-if="question.audio" type="primary" size="small" @click="playSound(question.audio)">音频播放</a-button>
       </a-spin>
     </div>
     <div class="bottom">
@@ -126,6 +127,13 @@ watch(isNoRepeat, () => {
     store.oneQuesMode = "noRepeat";
   } else if (!isNoRepeat.value && !isOrder.value) {
     store.oneQuesMode = "null";
+  }
+})
+
+// 自动播放音频
+watch(question, () => {
+  if (question.value || question.value.audio) {
+    playSound(question.value.audio);
   }
 })
 
@@ -238,6 +246,11 @@ const loadHistoryMode = () => {
     case "noRepeat": isNoRepeat.value = true; break;
     default: break;
   }
+}
+
+const playSound = (url: string) => {
+  const sound = new Audio(url);
+  sound.play();
 }
 
 onMounted(() => {

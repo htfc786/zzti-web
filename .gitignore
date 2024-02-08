@@ -26,3 +26,5 @@ dist-ssr
 
 # 题目信息文件
 src/data
+public/data
+public/audio

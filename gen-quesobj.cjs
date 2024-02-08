@@ -2,12 +2,19 @@
 // https://github.com/sunzsh/vue-el-demo/blob/master/gen-router.js
 // 参考： https://juejin.cn/post/7214831158873817143
 
+const { log } = require('console');
 var fs = require('fs');
 var path = require('path');
 
 const questionDir = './question';
 const fileExt = "txt";
 const fileEncoding = "utf-8";
+const audioFileType = "mp3";
+const audioFileSavePath = "./public/audio";
+const audioUrlPrefix = "./audio";
+
+let wordsList = [];
+let flag = 16;
 
 function getNowTimeStr(){
   // https://juejin.cn/post/7238510595543351354
@@ -43,15 +50,57 @@ async function exitsFolder(reaPath) {
   }
 }
 
+function removeDir(dir) {
+  // 同步删除文件夹
+  // https://juejin.cn/post/6844903582102192141
+  let files
+  try {
+    files = fs.readdirSync(dir);
+  } catch (e) {
+    return false;
+  }
+  for(var i=0;i<files.length;i++){
+    let newPath = path.join(dir,files[i]);
+    let stat = fs.statSync(newPath)
+    if(stat.isDirectory()){
+      //如果是文件夹就递归下去
+      removeDir(newPath);
+    }else {
+     //删除文件
+      fs.unlinkSync(newPath);
+    }
+  }
+  fs.rmdirSync(dir)//如果文件夹是空的，就将自己删除掉
+}
+
 function download(url,fileName,dir){
-  console.log('------------------------------------------------')
-  console.log(url)
-  console.log(fileName)
-  console.log(dir)
-  let stream = fs.createWriteStream(path.join(dir, fileName));
-  request(url).pipe(stream).on("close", function (err) {
-      console.log("文件" + fileName + "下载完毕");
-  });
+  return new Promise((resolve,reject)=>{
+    const savePath = path.join(dir,fileName);
+    fetch(url)
+      .then(res => res.blob())
+      .then(blob => blob.arrayBuffer())
+      .then(arrayBuffer => {
+        const buffer = Buffer.from(arrayBuffer);
+        fs.writeFile(savePath, buffer, (err) => {
+          if (err) reject(err)
+          resolve(savePath)
+        });
+      })
+      .catch(err => reject(err))
+  })
+}
+
+async function downloadTts(){
+  // 先删除文件夹,防止内容混乱
+  removeDir(audioFileSavePath)
+  await exitsFolder(audioFileSavePath);
+  // 循环创建下载任务
+  for(let i=0;i<wordsList.length;i++){
+    const [ lan, text, fileName ] = wordsList[i];
+    const url = `https://fanyi.baidu.com/gettts?lan=${lan}&text=${text}&spd=3&source=web`;
+    download(url, fileName, audioFileSavePath)
+      // .then(res => console.log(`${fileName}下载完成`, res));
+  }
 }
 
 function getObj(path) {
@@ -79,18 +128,42 @@ function getObj(path) {
         const hasAns = /#(.*?)answer(.*?)=(.*?)true(.*?)/.test(data[0])
         const resI = hasAns ? 1 : 0;
         for (var i = resI; i < data.length; i++) {
-          // 问题
-          var question = replaceText(data[i]);
-          if (!question) { continue; } //空行
-          //答案
-          let answer;
-          if(hasAns) {
-            answer = replaceText(data[i+1] ? data[i+1] : "");
-            answer && i++; //如果有答案，跳过下一行
+          // 判断音频n
+          if (/^<audio type="(.*?)">(.*?)<\/audio>/.test(data[i])) {
+            // 正则表达式
+            const pattern = /<audio type="(.*?)">(.*?)<\/audio>(.*?)\r/
+            const reRes = pattern.exec(data[i]);
+            if (!reRes){ console.log("⚠警告：文件",item,"第",i+1,"行：正则失败"); continue; } // 正则失败
+            // 截取参数
+            const [ type, text, answer ] = reRes.slice(1);
+            if (!type || !text){ console.log("⚠警告：文件",item,"第",i+1,"行：参数不全"); continue; } // 参数不全
+            // console.log(type, text, answer);
+            //类型判断
+            if (type == "url") {
+              fileResult.push({ audio: text, ans: answer })
+            } else if (type == "en" || type == "zh") {
+              // 音频文件，放到音频下载列表中
+              const audioFile = `${flag.toString(16)}.${audioFileType}`;flag++;
+              wordsList.push([type, text, audioFile])
+              //保存结果
+              const audioUrl = `${audioUrlPrefix}/${audioFile}`;
+              // console.log("音频文件：", audioUrl,answer);
+              fileResult.push({ audio: audioUrl, ans: answer })
+            }
+          } else {  //普通逻辑
+            // 问题
+            var question = replaceText(data[i]);
+            if (!question) { continue; } //空行
+            //答案
+            let answer;
+            if(hasAns) {
+              answer = replaceText(data[i+1] ? data[i+1] : "");
+              answer && i++; //如果有答案，跳过下一行
+            }
+            //结果
+            const quesResult = answer ? { q: question, ans: answer } : { q: question }; 
+            fileResult.push(quesResult);
           }
-          //结果
-          const quesResult = answer ? { q: question, ans: answer } : { q: question }; 
-          fileResult.push(quesResult);
         }
         // 加入总结果
         result[name] = fileResult;
@@ -111,8 +184,8 @@ function getObj(path) {
     note: noteText
   };
 
-  // const resultText = JSON.stringify(result, null, 2);
-  const resultText = JSON.stringify(result);
+  const resultText = JSON.stringify(result, null, 2);
+  // const resultText = JSON.stringify(result);
 
   // 文件操作
   // 检查data文件夹是否存在
@@ -124,5 +197,13 @@ function getObj(path) {
       // 如果没有错误
       console.log("./src/data/index.json 生成成功！") 
     });
+  
+  // 下载音频
+  wordsList.length && await downloadTts(wordsList);
+
 // });
 })();
+
+// (async () => {
+//   await download("https://fanyi.baidu.com/gettts?lan=en&text=type&spd=3&source=web","tts.mp3","./")
+// })();
