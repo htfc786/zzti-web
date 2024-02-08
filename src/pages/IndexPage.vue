@@ -66,12 +66,8 @@ import type { TreeSelectProps } from 'ant-design-vue'
 import { message, TreeSelect } from 'ant-design-vue'
 
 import fontResize from '../components/fontResize.vue'
-import {
-  getTreeDataByQues,
-  getPathListByTreeValueList,
-  getTreeValueListByPathList,
-  checkPathList,
-} from '../core/questions'
+import { getTreeDataByQues, getTreeValueListByPathList } from '../core/ui'
+import { getPathListByTreeValueList, checkPathList } from '../core/question'
 import { randomQuestionsByPathList } from '../core/random'
 import { globalStore } from '../core/globalStore.ts'
 

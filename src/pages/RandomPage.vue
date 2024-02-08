@@ -57,25 +57,16 @@ import { onMounted, ref, watch } from 'vue'
 import type { TreeSelectProps } from 'ant-design-vue'
 import { TreeSelect, message } from 'ant-design-vue'
 
-import {
-  randomOneQuestionByPathList,
-  getOneQuestionByIndex,
-  randomOneQuestion, 
-} from '../core/random'
-import {
-  getTreeDataByQues,
-  getPathListByTreeValueList,
-  getTreeValueListByPathList,
-  checkPathList,
-} from '../core/questions'
-import { getQuestionByPathList } from '../questions'
+import { randomOneQuestionByPathList, getOneQuestionByIndex, randomOneQuestion } from '../core/random'
+import { getTreeDataByQues, getTreeValueListByPathList } from '../core/ui'
+import { getQuestionByPathList, getPathListByTreeValueList, checkPathList, } from '../core/question'
 import fontResize from '../components/fontResize.vue'
 import { globalStore } from '../core/globalStore.ts'
 
 const store = globalStore();
 
 // 显示的问题
-const question = ref<any>({q: ""})
+const question = ref<any>({q: "", ans: ""})
 // 是否处于加载中
 const isLoading = ref<boolean>(false)
 // 选择的范围
@@ -172,7 +163,7 @@ const noRepeatQues = () => {
     return;
   }
   const ques = randomOneQuestion(noRepQuesList);
-  question.value = ques;
+  question.value = ques || "";
   //从抽取列表中删除
   noRepQuesList = noRepQuesList.filter(item => item !== ques)
 }

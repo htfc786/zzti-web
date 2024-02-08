@@ -3,6 +3,7 @@
 // 参考： https://juejin.cn/post/7214831158873817143
 
 var fs = require('fs');
+var path = require('path');
 
 const questionDir = './question';
 const fileExt = "txt";
@@ -30,15 +31,38 @@ function replaceText(text) {
   return res;
 }
 
+async function exitsFolder(reaPath) {
+  // 传入文件夹的路径看是否存在，存在不用管，不存在则直接创建文件夹
+  // https://blog.csdn.net/qq_41499782/article/details/112257554
+  const absPath = path.resolve(__dirname, reaPath);
+  try {
+    await fs.promises.stat(absPath)
+  } catch (e) {
+    // 不存在文件夹，直接创建 {recursive: true} 这个配置项是配置自动创建多个文件夹
+    await fs.promises.mkdir(absPath, {recursive: true})
+  }
+}
+
+function download(url,fileName,dir){
+  console.log('------------------------------------------------')
+  console.log(url)
+  console.log(fileName)
+  console.log(dir)
+  let stream = fs.createWriteStream(path.join(dir, fileName));
+  request(url).pipe(stream).on("close", function (err) {
+      console.log("文件" + fileName + "下载完毕");
+  });
+}
+
 function getObj(path) {
-  var result = "{";
+  var result = {};
   const items = fs.readdirSync(path);
   items.forEach(item => {
     const itemPath = `${path}/${item}`;
     if (fs.statSync(itemPath).isDirectory()) {
       // 如果是文件夹递归计算
       let children = getObj(itemPath);
-      result += `"${item}": ${children},`;
+      result[item] = children;
     } else { // 文件
       var file_list = item.split('.'); //获取扩展名，检查扩展名是不是txt
       if (file_list.length>=2 && file_list[file_list.length - 1] == fileExt) {
@@ -50,62 +74,55 @@ function getObj(path) {
         //按行分割
         const data = data_text.toString().split("\n");
         //结果
-        var fileResult = "[";
+        var fileResult = [];
         //是否存在答案 /#(.*?)answer(.*?)=(.*?)true(.*?)/ 
-        if (/#(.*?)answer(.*?)=(.*?)true(.*?)/.test(data[0])) {
-          // 答案模式
-          for (var i = 1; i < data.length; i+=2) {
-            // 问题
-            var question = replaceText(data[i]);
-            if (!question) { i--; continue; } //空行
-            //答案
-            var answer_raw = data[i+1] ? data[i+1] : ""; //预处理
-            var answer = replaceText(answer_raw);
-            if (!answer) { // 可能无答案
-              //按普通题目完成添加
-              // console.log("题目",question,"答案 无");
-              // fileResult += `"${question}", `;
-              fileResult += `{q: "${question}"}, `;
-              continue;
-            } 
-            // console.log("题目",question,"答案",answer);
-            fileResult += `{q: "${question}", ans: "${answer}"}, `;
+        const hasAns = /#(.*?)answer(.*?)=(.*?)true(.*?)/.test(data[0])
+        const resI = hasAns ? 1 : 0;
+        for (var i = resI; i < data.length; i++) {
+          // 问题
+          var question = replaceText(data[i]);
+          if (!question) { continue; } //空行
+          //答案
+          let answer;
+          if(hasAns) {
+            answer = replaceText(data[i+1] ? data[i+1] : "");
+            answer && i++; //如果有答案，跳过下一行
           }
-        } else {
-          // 普通模式
-          for (i = 0; i < data.length; i++) {
-            // 替换违法字符 
-            var add_res = replaceText(data[i]);
-            //空行
-            if (!add_res) { continue } 
-            //加入结果
-            // fileResult += `"${add_res}", `;
-            fileResult += `{q: "${add_res}"}, `;
-          }
+          //结果
+          const quesResult = answer ? { q: question, ans: answer } : { q: question }; 
+          fileResult.push(quesResult);
         }
-        fileResult += "]";
         // 加入总结果
-        result += `"${name}": ${fileResult}, `;
+        result[name] = fileResult;
       }
     }
   });
-  return result + "}";
+  return result;
 }
-// 问题对象的文本格式
-const questionObjText = getObj(questionDir);
-// 备注
-const noteText = `数据更新日期 ${getNowTimeStr()}`;
 
-const result = `\
-// 该文件由 gen-quesobj.cjs 自动生成，请勿手动修改
-// 题目数据
-export default ${questionObjText};
-export const questionNote = "${noteText}";
-` 
+(async () => {
+  // 问题对象的文本格式
+  const questionObj = getObj(questionDir);
+  // 备注
+  const noteText = `数据更新日期 ${getNowTimeStr()}`;
+  
+  const result = {
+    data: questionObj,
+    note: noteText
+  };
 
-fs.writeFile('./src/questions/questions.ts', result, 'utf-8', 
-  (err) => {  
-    if (err) throw err; 
-    // 如果没有错误
-    console.log("./src/questions/questions.ts 生成成功！") 
-  });
+  // const resultText = JSON.stringify(result, null, 2);
+  const resultText = JSON.stringify(result);
+
+  // 文件操作
+  // 检查data文件夹是否存在
+  await exitsFolder('./src/data');
+  // 保存文件
+  fs.writeFile('./src/data/index.json', resultText, 'utf-8', 
+    (err) => {  
+      if (err) throw err; 
+      // 如果没有错误
+      console.log("./src/data/index.json 生成成功！") 
+    });
+// });
+})();

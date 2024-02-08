@@ -37,12 +37,8 @@
 <script lang="ts" setup>
 import { ref, watchEffect } from 'vue'
 import type { MenuProps, ItemType } from 'ant-design-vue'
-import {
-  getMenuKeyByPath,
-  getMenuObj,
-  getPathByMenuKey,
-} from '../core/questions'
-import { getQuestionByPath } from '../questions'
+import { getMenuKeyByPath, getMenuObj, getPathByMenuKey } from '../core/ui'
+import { getQuestionByPath } from '../core/question'
 
 // 获取菜单元素对象
 const menuItems: ItemType[] = getMenuObj()
