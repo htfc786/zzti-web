@@ -4,3 +4,7 @@
 测试3"\
 114514
 "\
+123
+<audio type="en">text</audio> 文本
+<audio type="en">test</audio> 测试
+<audio type="en">afternoon</audio>

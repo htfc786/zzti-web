@@ -2,11 +2,19 @@
 // https://github.com/sunzsh/vue-el-demo/blob/master/gen-router.js
 // 参考： https://juejin.cn/post/7214831158873817143
 
+const { log } = require('console');
 var fs = require('fs');
+var path = require('path');
 
 const questionDir = './question';
 const fileExt = "txt";
 const fileEncoding = "utf-8";
+const audioFileType = "mp3";
+const audioFileSavePath = "./public/audio";
+const audioUrlPrefix = "./audio";
+
+let wordsList = [];
+let flag = 16;
 
 function getNowTimeStr(){
   // https://juejin.cn/post/7238510595543351354
@@ -30,15 +38,80 @@ function replaceText(text) {
   return res;
 }
 
+async function exitsFolder(reaPath) {
+  // 传入文件夹的路径看是否存在，存在不用管，不存在则直接创建文件夹
+  // https://blog.csdn.net/qq_41499782/article/details/112257554
+  const absPath = path.resolve(__dirname, reaPath);
+  try {
+    await fs.promises.stat(absPath)
+  } catch (e) {
+    // 不存在文件夹，直接创建 {recursive: true} 这个配置项是配置自动创建多个文件夹
+    await fs.promises.mkdir(absPath, {recursive: true})
+  }
+}
+
+function removeDir(dir) {
+  // 同步删除文件夹
+  // https://juejin.cn/post/6844903582102192141
+  let files
+  try {
+    files = fs.readdirSync(dir);
+  } catch (e) {
+    return false;
+  }
+  for(var i=0;i<files.length;i++){
+    let newPath = path.join(dir,files[i]);
+    let stat = fs.statSync(newPath)
+    if(stat.isDirectory()){
+      //如果是文件夹就递归下去
+      removeDir(newPath);
+    }else {
+     //删除文件
+      fs.unlinkSync(newPath);
+    }
+  }
+  fs.rmdirSync(dir)//如果文件夹是空的，就将自己删除掉
+}
+
+function download(url,fileName,dir){
+  return new Promise((resolve,reject)=>{
+    const savePath = path.join(dir,fileName);
+    fetch(url)
+      .then(res => res.blob())
+      .then(blob => blob.arrayBuffer())
+      .then(arrayBuffer => {
+        const buffer = Buffer.from(arrayBuffer);
+        fs.writeFile(savePath, buffer, (err) => {
+          if (err) reject(err)
+          resolve(savePath)
+        });
+      })
+      .catch(err => reject(err))
+  })
+}
+
+async function downloadTts(){
+  // 先删除文件夹,防止内容混乱
+  removeDir(audioFileSavePath)
+  await exitsFolder(audioFileSavePath);
+  // 循环创建下载任务
+  for(let i=0;i<wordsList.length;i++){
+    const [ lan, text, fileName ] = wordsList[i];
+    const url = `https://fanyi.baidu.com/gettts?lan=${lan}&text=${text}&spd=3&source=web`;
+    download(url, fileName, audioFileSavePath)
+      // .then(res => console.log(`${fileName}下载完成`, res));
+  }
+}
+
 function getObj(path) {
-  var result = "{";
+  var result = {};
   const items = fs.readdirSync(path);
   items.forEach(item => {
     const itemPath = `${path}/${item}`;
     if (fs.statSync(itemPath).isDirectory()) {
       // 如果是文件夹递归计算
       let children = getObj(itemPath);
-      result += `"${item}": ${children},`;
+      result[item] = children;
     } else { // 文件
       var file_list = item.split('.'); //获取扩展名，检查扩展名是不是txt
       if (file_list.length>=2 && file_list[file_list.length - 1] == fileExt) {
@@ -50,62 +123,87 @@ function getObj(path) {
         //按行分割
         const data = data_text.toString().split("\n");
         //结果
-        var fileResult = "[";
+        var fileResult = [];
         //是否存在答案 /#(.*?)answer(.*?)=(.*?)true(.*?)/ 
-        if (/#(.*?)answer(.*?)=(.*?)true(.*?)/.test(data[0])) {
-          // 答案模式
-          for (var i = 1; i < data.length; i+=2) {
+        const hasAns = /#(.*?)answer(.*?)=(.*?)true(.*?)/.test(data[0])
+        const resI = hasAns ? 1 : 0;
+        for (var i = resI; i < data.length; i++) {
+          // 判断音频n
+          if (/^<audio type="(.*?)">(.*?)<\/audio>/.test(data[i])) {
+            // 正则表达式
+            const pattern = /<audio type="(.*?)">(.*?)<\/audio>(.*?)\r/
+            const reRes = pattern.exec(data[i]);
+            if (!reRes){ console.log("⚠警告：文件",item,"第",i+1,"行：正则失败"); continue; } // 正则失败
+            // 截取参数
+            const [ type, text, answer ] = reRes.slice(1);
+            if (!type || !text){ console.log("⚠警告：文件",item,"第",i+1,"行：参数不全"); continue; } // 参数不全
+            // console.log(type, text, answer);
+            //类型判断
+            if (type == "url") {
+              fileResult.push({ audio: text, ans: answer })
+            } else if (type == "en" || type == "zh") {
+              // 音频文件，放到音频下载列表中
+              const audioFile = `${flag.toString(16)}.${audioFileType}`;flag++;
+              wordsList.push([type, text, audioFile])
+              //保存结果
+              const audioUrl = `${audioUrlPrefix}/${audioFile}`;
+              // console.log("音频文件：", audioUrl,answer);
+              fileResult.push({ audio: audioUrl, ans: answer })
+            }
+          } else {  //普通逻辑
             // 问题
             var question = replaceText(data[i]);
-            if (!question) { i--; continue; } //空行
+            if (!question) { continue; } //空行
             //答案
-            var answer_raw = data[i+1] ? data[i+1] : ""; //预处理
-            var answer = replaceText(answer_raw);
-            if (!answer) { // 可能无答案
-              //按普通题目完成添加
-              // console.log("题目",question,"答案 无");
-              // fileResult += `"${question}", `;
-              fileResult += `{q: "${question}"}, `;
-              continue;
-            } 
-            // console.log("题目",question,"答案",answer);
-            fileResult += `{q: "${question}", ans: "${answer}"}, `;
-          }
-        } else {
-          // 普通模式
-          for (i = 0; i < data.length; i++) {
-            // 替换违法字符 
-            var add_res = replaceText(data[i]);
-            //空行
-            if (!add_res) { continue } 
-            //加入结果
-            // fileResult += `"${add_res}", `;
-            fileResult += `{q: "${add_res}"}, `;
+            let answer;
+            if(hasAns) {
+              answer = replaceText(data[i+1] ? data[i+1] : "");
+              answer && i++; //如果有答案，跳过下一行
+            }
+            //结果
+            const quesResult = answer ? { q: question, ans: answer } : { q: question }; 
+            fileResult.push(quesResult);
           }
         }
-        fileResult += "]";
         // 加入总结果
-        result += `"${name}": ${fileResult}, `;
+        result[name] = fileResult;
       }
     }
   });
-  return result + "}";
+  return result;
 }
-// 问题对象的文本格式
-const questionObjText = getObj(questionDir);
-// 备注
-const noteText = `数据更新日期 ${getNowTimeStr()}`;
 
-const result = `\
-// 该文件由 gen-quesobj.cjs 自动生成，请勿手动修改
-// 题目数据
-export default ${questionObjText};
-export const questionNote = "${noteText}";
-` 
+(async () => {
+  // 问题对象的文本格式
+  const questionObj = getObj(questionDir);
+  // 备注
+  const noteText = `数据更新日期 ${getNowTimeStr()}`;
+  
+  const result = {
+    data: questionObj,
+    note: noteText
+  };
 
-fs.writeFile('./src/questions/questions.ts', result, 'utf-8', 
-  (err) => {  
-    if (err) throw err; 
-    // 如果没有错误
-    console.log("./src/questions/questions.ts 生成成功！") 
-  });
+  const resultText = JSON.stringify(result, null, 2);
+  // const resultText = JSON.stringify(result);
+
+  // 文件操作
+  // 检查data文件夹是否存在
+  await exitsFolder('./src/data');
+  // 保存文件
+  fs.writeFile('./src/data/index.json', resultText, 'utf-8', 
+    (err) => {  
+      if (err) throw err; 
+      // 如果没有错误
+      console.log("./src/data/index.json 生成成功！") 
+    });
+  
+  // 下载音频
+  wordsList.length && await downloadTts(wordsList);
+
+// });
+})();
+
+// (async () => {
+//   await download("https://fanyi.baidu.com/gettts?lan=en&text=type&spd=3&source=web","tts.mp3","./")
+// })();

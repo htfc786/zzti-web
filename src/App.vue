@@ -42,21 +42,22 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { GithubOutlined } from '@ant-design/icons-vue';
 import { storeToRefs } from 'pinia'
 
+import TJzk2024 from './components/2024TJzk.vue';
 import { globalStore } from './core/globalStore.ts'
 import { isSupportedCssVariable } from './core/tools';
-import { questionNote } from './questions/questions';
-import TJzk2024 from './components/2024TJzk.vue';
+import { note as questionNote } from './core/question';
 
 const store = globalStore();
 const route = useRoute();
 const router = useRouter();
 
 const notes = ref<string>(questionNote);
+// const notes = ref<string>("暂无信息");
 
 //夜间模式
 const dark_mode = storeToRefs(store).dark_mode;
@@ -74,18 +75,6 @@ const changeContentMinHeight = () => {
     content.style.setProperty('--content-min-height', (contentMinHeight - allMargin) + "px");
   }
 };
-
-const initChangeContentMinHeight = () => {
-  window.onresize = function() {
-    changeContentMinHeight();
-  };
-
-  changeContentMinHeight();
-};
-
-onMounted(() => {
-  initChangeContentMinHeight()
-});
 
 // 显示蓝条url
 const selectedKeys = computed(() => {
@@ -112,6 +101,14 @@ watch(dark_mode, ()=>{
     document.body.classList.remove("dark")
   }
 }, { immediate: true });
+
+onMounted(() => {
+  window.addEventListener("resize", changeContentMinHeight);
+  changeContentMinHeight();
+});
+onUnmounted(() => {
+  window.removeEventListener("resize", changeContentMinHeight);
+});
 </script>
 
 <style scoped>
