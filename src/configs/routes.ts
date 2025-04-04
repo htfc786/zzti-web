@@ -20,6 +20,10 @@ export default [
     path: "/questions",
     component: () => import("../pages/QuestionsPage.vue"),
   },
+  {
+    path: "/card",
+    component: () => import("../pages/CardPage.vue"),
+  },
   // 404页面
   {
     path: "/404",
