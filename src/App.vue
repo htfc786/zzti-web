@@ -18,6 +18,7 @@
           <a-menu-item key="/index">默写</a-menu-item>
           <a-menu-item key="/random">抽题</a-menu-item>
           <a-menu-item key="/questions">列表</a-menu-item>
+          <a-menu-item key="/card">卡片</a-menu-item>
           <a-menu-item>
             <a href="https://github.com/htfc786/zzti-web" target="_blank">
               <github-outlined /> 代码开源
