@@ -5,7 +5,6 @@
 var fs = require('fs');
 
 const questionDir = './question';
-const fileExt = "txt";
 const fileEncoding = "utf-8";
 
 function getNowTimeStr(){
@@ -41,7 +40,7 @@ function getObj(path) {
       result += `"${item}": ${children},`;
     } else { // 文件
       var file_list = item.split('.'); //获取扩展名，检查扩展名是不是txt
-      if (file_list.length>=2 && file_list[file_list.length - 1] == fileExt) {
+      if (file_list.length>=2 && file_list[file_list.length - 1] === "txt") {
         //生成文件名
         file_list.pop();
         const name = file_list.join(".");
@@ -86,6 +85,11 @@ function getObj(path) {
         fileResult += "]";
         // 加入总结果
         result += `"${name}": ${fileResult}, `;
+      } else if (file_list.length>=2 && file_list[file_list.length - 1] === "json") {
+        // 处理json文件
+        const data_text = fs.readFileSync(itemPath, fileEncoding);
+        const data = JSON.parse(data_text);
+        result += `"${item}": ${JSON.stringify(data)}, `;
       }
     }
   });
