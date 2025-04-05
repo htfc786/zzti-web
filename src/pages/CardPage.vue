@@ -8,27 +8,32 @@
           :columns="columns" 
           :data-source="dataSource" 
           bordered 
-          :pagination="false" 
+          :pagination="false"
+          ref="tableRef"
           >
-          <template #bodyCell="{ column, text, record }">
+          <template #bodyCell="{ column, text, index }">
             <template v-if="column.dataIndex === 'operation'">
               <div class="editable-row-operations">
-                <span v-if="editableData[record.key]">
-                  <a-typography-link @click="tableSave(record.key)" style="margin-right: 2px;">保存</a-typography-link>
-                  <a-popconfirm title="放弃更改?" @confirm="tableCancel(record.key)">
+                <span v-if="editableData[index]">
+                  <a-typography-link @click="tableSave(index)" style="margin-right: 2px;">保存</a-typography-link>
+                  <a-popconfirm title="放弃更改?" @confirm="tableCancel(index)">
                     <a>取消</a>
                   </a-popconfirm>
                 </span>
                 <span v-else>
-                  <a @click="tableEdit(record.key)">编辑</a>
+                  <a @click="tableEdit(index)" style="margin-right: 2px;">编辑</a>
+                  <a-popconfirm title="确定删除?" @confirm="tableDel(index)">
+                    <a style="color: red;">删除</a>
+                  </a-popconfirm>
                 </span>
               </div>
             </template>
+            <template v-else-if="column.dataIndex === 'index'">{{ index+1 }}</template>
             <template v-else>
               <div>
                 <a-input
-                  v-if="editableData[record.key]"
-                  v-model:value="editableData[record.key][column.dataIndex]"
+                  v-if="editableData[index]"
+                  v-model:value="editableData[index][column.dataIndex]"
                   style="margin: -5px 0"
                 />
                 <template v-else>
@@ -41,7 +46,7 @@
         <!-- 配置信息 -->
         <div class="config" style="line-height: 24px;">
           <a-row>
-            <a-button>添加信息</a-button>
+            <a-button @click="addCard">添加信息</a-button>
           </a-row>
           <a-row>正面：
             字号：<a-select size="small" v-model:value="config.front.fontSize" :options="fontSizeOptions"></a-select>
@@ -115,26 +120,46 @@ onMounted(() => {
 })
 // 关于表格
 const columns = [
-  { title: '#', dataIndex: 'key', width: '10%' },
+  { title: '#', dataIndex: 'index', width: '10%' },
   { title: '正面', dataIndex: 'front' },
   { title: '反面', dataIndex: 'back' },
   { title: '备注', dataIndex: 'content' },
   { title: '', dataIndex: 'operation' },
 ];
+const tableRef = ref();
 const editableData = reactive<any>({});
 const cloneDeep = (obj: any) => {
   return JSON.parse(JSON.stringify(obj));
 }
 const tableEdit = (key: number) => {
-  editableData[key] = cloneDeep(dataSource.value.filter(item => key === item.key)[0]);
+  editableData[key] = cloneDeep(dataSource.value[key]);
 };
 const tableSave = (key: number) => {
-  Object.assign(dataSource.value.filter(item => key === item.key)[0], editableData[key]);
+  Object.assign(dataSource.value[key], editableData[key]);
   delete editableData[key];
 };
 const tableCancel = (key: number) => {
   delete editableData[key];
 };
+const tableDel = (key: number) => {
+  dataSource.value.splice(key, 1)
+  // 删除编辑
+  delete editableData[key]
+};
+const addCard = () => {
+  dataSource.value.push({
+    front: '',
+    back: '',
+    content: '',
+  })
+  // 编辑
+  tableEdit(dataSource.value.length-1)
+  // 滚动条到底部
+  const dom = tableRef.value.$el
+  requestAnimationFrame(() => {
+    dom.scrollTo(0, dom.scrollHeight)
+  })
+}
 // 参数设置
 const fontSizeOptions = [
   { label: 'h1', value: 'h1' },
@@ -239,10 +264,10 @@ const data: cardTools.cardContent[] = [
   { front: '正面', back: '反面', content: '备注',},
   { front: '正面', back: '反面', content: '备注',},
   { front: '正面', back: '反面',},
-  { front: '正面', back: '反面', },{ front: '正面', back: '反面', },{ front: '正面', back: '反面', },{ front: '正面', back: '反面', },{ front: '正面', back: '反面', },{ front: '正面', back: '反面', },{ front: '正面', back: '反面', },{ front: '正面', back: '反面', },
+  // { front: '正面', back: '反面', },{ front: '正面', back: '反面', },{ front: '正面', back: '反面', },{ front: '正面', back: '反面', },{ front: '正面', back: '反面', },{ front: '正面', back: '反面', },{ front: '正面', back: '反面', },{ front: '正面', back: '反面', },
 ]
 
-const dataSource = ref(data.map((item, index) => ({ ...item, key: index+1 })));
+const dataSource = ref(data);
 </script>
 
 <style scoped>
