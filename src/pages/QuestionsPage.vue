@@ -18,9 +18,11 @@
     <a-col flex="auto">
       <a-list item-layout="horizontal" :data-source="questionData">
         <template #renderItem="{ item, index }">
-          <a-list-item>
-            <span class="d-item">{{ index + 1 }}、{{ item.q }}</span>
-            <div v-if="item.ans" style="margin-left: 8px;">
+          <a-list-item :class="{ 'audio': item.audio }">
+            <span class="d-item">{{ index + 1 }}、{{ item.q || "" }}</span>
+            <a-button v-if="item.audio" type="primary" size="small" @click="playSound(item.audio)">音频播放</a-button>
+            <span v-if="item.audio" class="d-item">{{ item.ans || "" }}</span>
+            <div v-if="item.ans && !item.audio" style="margin-left: 8px;">
               <a-popover title="答案查看" trigger="click" placement="bottomRight">
                 <template #content>
                   <span>{{ item.ans }}</span>
@@ -37,12 +39,8 @@
 <script lang="ts" setup>
 import { ref, watchEffect } from 'vue'
 import type { MenuProps, ItemType } from 'ant-design-vue'
-import {
-  getMenuKeyByPath,
-  getMenuObj,
-  getPathByMenuKey,
-} from '../core/questions'
-import { getQuestionByPath } from '../questions'
+import { getMenuKeyByPath, getMenuObj, getPathByMenuKey } from '../core/ui'
+import { getQuestionByPath } from '../core/question'
 
 // 获取菜单元素对象
 const menuItems: ItemType[] = getMenuObj()
@@ -86,12 +84,23 @@ const gotoPathByIndex = (index: number) => {
   questionPath.value = res
   selectedKeys.value = getMenuKeyByPath(res, menuItems)
 }
+
+const playSound = (url: string) => {
+  const sound = new Audio(url);
+  sound.play();
+}
 </script>
 
 <style scoped>
 .ant-breadcrumb {
   margin-left: 25px;
   margin-bottom: 10px;
+}
+.audio {
+  justify-content: flex-start;
+}
+.audio > .ant-btn {
+  margin-right: 8px;
 }
 /* 夜间模式样式 */
 .dark .d-item {

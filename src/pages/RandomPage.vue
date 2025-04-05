@@ -29,7 +29,8 @@
     </div>
     <div class="question">
       <a-spin class="" size="large" :spinning="isLoading">
-        <h1 :style="{ 'font-size': fontSize + 'px' }">{{ question.q }}</h1>
+        <h1 v-if="question.q" :style="{ 'font-size': fontSize + 'px' }">{{ question.q }}</h1>
+        <a-button v-if="question.audio" type="primary" size="small" @click="playSound(question.audio)">音频播放</a-button>
       </a-spin>
     </div>
     <div class="bottom">
@@ -57,25 +58,16 @@ import { onMounted, ref, watch } from 'vue'
 import type { TreeSelectProps } from 'ant-design-vue'
 import { TreeSelect, message } from 'ant-design-vue'
 
-import {
-  randomOneQuestionByPathList,
-  getOneQuestionByIndex,
-  randomOneQuestion, 
-} from '../core/random'
-import {
-  getTreeDataByQues,
-  getPathListByTreeValueList,
-  getTreeValueListByPathList,
-  checkPathList,
-} from '../core/questions'
-import { getQuestionByPathList } from '../questions'
+import { randomOneQuestionByPathList, getOneQuestionByIndex, randomOneQuestion } from '../core/random'
+import { getTreeDataByQues, getTreeValueListByPathList } from '../core/ui'
+import { getQuestionByPathList, getPathListByTreeValueList, checkPathList, } from '../core/question'
 import fontResize from '../components/fontResize.vue'
 import { globalStore } from '../core/globalStore.ts'
 
 const store = globalStore();
 
 // 显示的问题
-const question = ref<any>({q: ""})
+const question = ref<any>({q: "", ans: ""})
 // 是否处于加载中
 const isLoading = ref<boolean>(false)
 // 选择的范围
@@ -138,6 +130,13 @@ watch(isNoRepeat, () => {
   }
 })
 
+// 自动播放音频
+watch(question, () => {
+  if (question.value || question.value.audio) {
+    playSound(question.value.audio);
+  }
+})
+
 const orderQues = () => {
   const r_Question = getOneQuestionByIndex(pathList, orderIndex)
   if (!r_Question) {
@@ -172,7 +171,7 @@ const noRepeatQues = () => {
     return;
   }
   const ques = randomOneQuestion(noRepQuesList);
-  question.value = ques;
+  question.value = ques || "";
   //从抽取列表中删除
   noRepQuesList = noRepQuesList.filter(item => item !== ques)
 }
@@ -247,6 +246,11 @@ const loadHistoryMode = () => {
     case "noRepeat": isNoRepeat.value = true; break;
     default: break;
   }
+}
+
+const playSound = (url: string) => {
+  const sound = new Audio(url);
+  sound.play();
 }
 
 onMounted(() => {

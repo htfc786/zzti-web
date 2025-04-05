@@ -25,4 +25,6 @@ dist-ssr
 *.sw?
 
 # 题目信息文件
-src/questions/questions.ts
+src/data
+public/data
+public/audio

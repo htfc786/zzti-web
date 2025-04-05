@@ -47,10 +47,11 @@
       <a-spin class="" size="large" :spinning="isLoading">
         <a-list item-layout="horizontal" :data-source="questionList">
           <template #renderItem="{ item, index }">
-            <a-list-item>
+            <a-list-item :class="{ 'audio': item.audio }">
               <h1 class="d-item" :style="{ 'font-size': fontSize + 'px' }">
-                {{ index + 1 }}、{{ item.q }}
+                {{ index + 1 }}、{{ item.q || "" }}
               </h1>
+            <a-button v-if="item.audio" type="primary" size="small" @click="playSound(item.audio)">音频播放</a-button>
             </a-list-item>
           </template>
         </a-list>
@@ -66,12 +67,8 @@ import type { TreeSelectProps } from 'ant-design-vue'
 import { message, TreeSelect } from 'ant-design-vue'
 
 import fontResize from '../components/fontResize.vue'
-import {
-  getTreeDataByQues,
-  getPathListByTreeValueList,
-  getTreeValueListByPathList,
-  checkPathList,
-} from '../core/questions'
+import { getTreeDataByQues, getTreeValueListByPathList } from '../core/ui'
+import { getPathListByTreeValueList, checkPathList } from '../core/question'
 import { randomQuestionsByPathList } from '../core/random'
 import { globalStore } from '../core/globalStore.ts'
 
@@ -173,6 +170,11 @@ const loadHistory = () => {
   message.info("已自动加载上次选择的抽题范围了")
 }
 
+const playSound = (url: string) => {
+  const sound = new Audio(url);
+  sound.play();
+}
+
 onMounted(() => {
   loadHistory()
 })
@@ -203,6 +205,13 @@ onMounted(() => {
 .question h1 {
   margin: 0;
   cursor: context-menu;
+}
+
+.audio {
+  justify-content: flex-start;
+}
+.audio > .ant-btn {
+  margin-right: 8px;
 }
 
 /* 夜间模式样式 */
