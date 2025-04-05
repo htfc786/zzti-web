@@ -1,11 +1,11 @@
 <template>
   <div class="main">
     <a-row class="header" type="flex" align="middle">
-      <a-col flex="200px" style="margin: 0 auto">
+      <a-col flex="120px" style="margin: 0 auto">
         <RouterLink to="/">
           <a-row align="middle">
             <img src="/vite.svg" alt="vite.svg" />
-            <span class="title">Vite + Vue + TS</span>
+            <span class="title">zzti-web</span>
           </a-row>
         </RouterLink>
       </a-col>
@@ -31,10 +31,10 @@
       <router-view />
     </div>
     <div class="footer">
-      <span><TJzk2024/></span>
+      <span><TJgk2027/></span>
       <span>备注：{{ notes }}</span>
       <span><a href="https://github.com/htfc786/zzti-web" target="_blank">zzti-web</a> - 帮政治老师开发的默写抽题系统 by htfc786</span>
-      <span>前端代码感谢：<a href="https://github.com/liyupi/sql-mother" target="_blank">SQL之母</a> by 鱼皮</span>
+      <span>前端代码参考：<a href="https://github.com/liyupi/sql-mother" target="_blank">SQL之母</a> by 鱼皮</span>
       <span>本站使用Github搭建</span>
       <span><a-switch v-model:checked="dark_mode" />夜间模式</span>
     </div>
@@ -51,7 +51,7 @@ import { storeToRefs } from 'pinia'
 import { globalStore } from './core/globalStore.ts'
 import { isSupportedCssVariable } from './core/tools';
 import { questionNote } from './questions/questions';
-import TJzk2024 from './components/2024TJzk.vue';
+import TJgk2027 from './components/2027TJgk.vue';
 
 const store = globalStore();
 const route = useRoute();
