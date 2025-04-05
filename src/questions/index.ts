@@ -1,6 +1,20 @@
 import questionObj from './questions'
 import { isValidKey } from '../core/tools'
 
+const tempQuestion:any = {}
+
+//获取题目对象
+export const getQuestionObj = (): object => {
+  if (tempQuestion && Object.keys(tempQuestion).length > 0) {
+    return {
+      ...questionObj,
+      "临时题库": tempQuestion,
+    }
+  } else {
+    return questionObj
+  }
+}
+
 /**
  * 根据传入题目对象返回题目列表
  * @param questionObj 问题对象，类似于questionObj对象
@@ -27,7 +41,7 @@ export const getQuestionByQuesObj = (questionObj: object): Array<string> => {
 export const getQuestionByPath = (
   pathList: Array<string | null>
 ): Array<string | null> | null => {
-  var question = questionObj
+  var question = getQuestionObj()
   for (var i = 0, len = pathList.length; i < len; i++) {
     const key = pathList[i]
     if (key) {
@@ -73,7 +87,7 @@ export const getAllQuestion = (): Array<string | null> => {
  * @returns 是否存在
  */
 export const isQuestionPathExist = (path: Array<string | null>): boolean => {
-  var question = questionObj
+  var question = getQuestionObj()
   for (var i = 0, len = path.length; i < len; i++) {
     const key = path[i]
     if (key) {
@@ -84,4 +98,15 @@ export const isQuestionPathExist = (path: Array<string | null>): boolean => {
     }
   }
   return true;
+}
+
+// 向题库中添加临时数据
+export const addTempQuestion = (name: string, question: any): void => {
+  //如果名字已经有,换名字
+  if (tempQuestion[name]) {
+    name = name + '_1'
+    addTempQuestion( name, question )
+    return
+  }
+  tempQuestion[name] = question
 }

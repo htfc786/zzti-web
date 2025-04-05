@@ -19,7 +19,13 @@
       <a-list item-layout="horizontal" :data-source="questionData">
         <template #renderItem="{ item, index }">
           <a-list-item>
-            <span class="d-item">{{ index + 1 }}、{{ item.q }}</span>
+            <span class="d-item">
+              {{ index + 1 }}、{{ item.q }}
+              <template v-if="item.con">
+                <!-- 备注查看,灰色字体 -->
+                <span class="con" style="color: #8c8c8c">{{ item.con }}</span>
+              </template>
+            </span>
             <div v-if="item.ans" style="margin-left: 8px;">
               <a-popover title="答案查看" trigger="click" placement="bottomRight">
                 <template #content>

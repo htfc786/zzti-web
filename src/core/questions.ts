@@ -2,7 +2,7 @@ import { reactive, VueElement, h } from 'vue'
 import type { ItemType } from 'ant-design-vue'
 import { FileOutlined, FolderOpenOutlined } from '@ant-design/icons-vue'
 import { isQuestionPathExist } from '../questions'
-import questionObj from '../questions/questions'
+import { getQuestionObj } from '../questions'
 
 /**
  * 用于创建menu一个对象
@@ -55,7 +55,7 @@ export const getMenuItems = (list: Object) => {
  * @return MenuObj
  */
 export const getMenuObj = () => {
-  const menuItems = getMenuItems(questionObj)
+  const menuItems = getMenuItems(getQuestionObj())
   return reactive(menuItems)
 }
 
@@ -136,7 +136,7 @@ export const getTreeDataByQues = () => {
     {
       label: '全部题目',
       value: '\\',
-      children: getTreeData(questionObj),
+      children: getTreeData(getQuestionObj()),
     },
   ]
 }

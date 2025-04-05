@@ -264,14 +264,7 @@ const createPdf = async () => {
   });
 }
 
-const data: cardTools.cardContent[] = [
-  { front: '正面', back: '反面', content: '备注',},
-  { front: '正面', back: '反面', content: '备注',},
-  { front: '正面', back: '反面',},
-  // { front: '正面', back: '反面', },{ front: '正面', back: '反面', },{ front: '正面', back: '反面', },{ front: '正面', back: '反面', },{ front: '正面', back: '反面', },{ front: '正面', back: '反面', },{ front: '正面', back: '反面', },{ front: '正面', back: '反面', },
-]
-
-const dataSource = ref(data);
+const dataSource = ref<cardTools.cardContent[]>([]);
 
 // 导入数据相关
 const importModalVisible = ref(false);
