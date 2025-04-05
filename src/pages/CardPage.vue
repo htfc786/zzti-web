@@ -44,60 +44,51 @@
             <a-button>添加信息</a-button>
           </a-row>
           <a-row>正面：
-            字号：<a-input-number size="small" :min="1" :max="100" v-model:value="config.front.fontSize" />
-            字色：<a-select size="small" v-model:value="config.front.color">
-              <a-select-option value="black">黑</a-select-option>
-              <a-select-option value="grey">灰</a-select-option>
-              <a-select-option value="red">红</a-select-option>
-              <a-select-option value="blue">蓝</a-select-option>
-            </a-select>
+            字号：<a-select size="small" v-model:value="config.front.fontSize" :options="fontSizeOptions"></a-select>
+            字色：<a-select size="small" v-model:value="config.front.color" :options="fontColorOptions"></a-select>
           </a-row>
           <a-row>反面：
-            字号：<a-input-number size="small" :min="1" :max="100" v-model:value="config.back.fontSize" />
-            字色：<a-select size="small" v-model:value="config.back.color">
-              <a-select-option value="black">黑</a-select-option>
-              <a-select-option value="grey">灰</a-select-option>
-              <a-select-option value="red">红</a-select-option>
-              <a-select-option value="blue">蓝</a-select-option>
-            </a-select>
+            字号：<a-select size="small" v-model:value="config.back.fontSize" :options="fontSizeOptions"></a-select>
+            字色：<a-select size="small" v-model:value="config.back.color" :options="fontColorOptions"></a-select>
           </a-row>
           <a-row>备注：
-            字号：<a-input-number size="small" :min="1" :max="100" v-model:value="config.content.fontSize" />
-            字色：<a-select size="small" v-model:value="config.content.color">
-              <a-select-option value="black">黑</a-select-option>
-              <a-select-option value="grey">灰</a-select-option>
-              <a-select-option value="red">红</a-select-option>
-              <a-select-option value="blue">蓝</a-select-option>
-            </a-select>
+            字号：<a-select size="small" v-model:value="config.content.fontSize" :options="fontSizeOptions"></a-select>
+            字色：<a-select size="small" v-model:value="config.content.color" :options="fontColorOptions"></a-select>
+            位置：<a-select size="small" v-model:value="config.paper.contentPosition" :options="contentPositionOptions"></a-select>
           </a-row>
           <a-row>页面配置：
-            纸张：<a-select size="small" v-model:value="config.paper.size">
-              <a-select-option value="horizontal">A4(横)</a-select-option>
-              <a-select-option value="vertical">A4(竖)</a-select-option>
-            </a-select>
+            纸张：<a-select size="small" v-model:value="config.paper.size" :options="paperSizeOptions"></a-select>
             个数：<a-input-number size="small" :min="1" :max="100" style="width: 50px;" v-model:value="config.paper.count.x" /> 
             X <a-input-number size="small" :min="1" :max="100" style="width: 50px;" v-model:value="config.paper.count.y" />
           </a-row>
-          <a-row type="flex" justify="end">
-            <a-button type="primary" @click="generateCard">生成卡片</a-button>
+          <a-row type="flex" justify="space-between">
+            <a-col>
+              卡片页码：<a-switch v-model:checked="config.paper.showCardNum" />
+              页码：<a-switch v-model:checked="config.paper.showPageNum" />
+            </a-col>
+            <a-button style="margin-left: 8px;" type="primary" @click="generateCard">生成卡片</a-button>
           </a-row>
         </div>
       </a-col>
       <a-col class="right" :span="12">
         <!-- 卡片展示 -->
-        <a-list size="small" bordered :data-source="data" class="card-list">
-          <template #renderItem="{ item }">
+        <a-list size="small" bordered :data-source="paperImageData" class="card-list">
+          <template #renderItem="{ item, index }">
             <a-list-item>
-              第{{ item.key }}张
+              第{{ index+1 }}张
               <a-image
                 :width="200"
-                src="https://aliyuncdn.antdv.com/vue.png"
+                :src="item"
               />
             </a-list-item>
           </template>
         </a-list>
+        <!-- 进度条 -->
+        <a-row type="flex" justify="start">
+          <a-progress :percent="generateProgress" style="margin-left: 16px;" />
+        </a-row>
         <a-row type="flex" justify="end">
-          <a-button type="primary" @click="">导出PDF</a-button>
+          <a-button type="primary" @click="createPdf">导出PDF</a-button>
         </a-row>
       </a-col>
     </a-row>
@@ -105,8 +96,10 @@
 </template>
 
 <script setup lang="ts">
-import { onUnmounted } from 'vue'
-import { ref, onMounted, reactive } from 'vue'
+import { ref, onMounted, onUnmounted, reactive, h } from 'vue'
+import { message, Modal, Button } from 'ant-design-vue'
+import * as cardTools from '../core/card'
+
 const contentHeight = ref(0)
 onMounted(() => {
   // 获取页面高度
@@ -143,18 +136,106 @@ const tableCancel = (key: number) => {
   delete editableData[key];
 };
 // 参数设置
-const config = ref({
-  front: { fontSize: 12, color: 'black' },
-  back: { fontSize: 12, color: 'black' },
-  content: { fontSize: 12, color: 'grey' },
-  paper: { size: 'horizontal', count: { x: 1, y: 1 } },
+const fontSizeOptions = [
+  { label: 'h1', value: 'h1' },
+  { label: 'h2', value: 'h2' },
+  { label: 'h3', value: 'h3' },
+  { label: 'h4', value: 'h4' },
+  { label: 'h5', value: 'h5' },
+  { label: 'h6', value: 'h6' }
+]
+const fontColorOptions = [
+  { label: '黑', value: 'black' },
+  { label: '灰', value: 'grey' },
+  { label: '红', value: 'red' },
+  { label: '蓝', value: 'blue' }
+]
+const paperSizeOptions = [
+  { label: 'A4(横)', value: 'horizontal' },
+  { label: 'A4(竖)', value: 'vertical' }
+]
+const contentPositionOptions = [
+  { label: '正面', value: 'front' },
+  { label: '反面', value: 'back' }
+]
+// 配置项
+const config = ref<cardTools.cardConfig>({
+  front: { fontSize: "h2", color: 'black' },
+  back: { fontSize: "h3", color: 'black' },
+  content: { fontSize: "h5", color: 'grey' },
+  paper: { 
+    size: 'horizontal', 
+    count: { x: 8, y: 4 },
+    contentPosition: 'front',
+    showCardNum: true,
+    showPageNum: true,
+  },
 });
+// 页图像数据
+const paperImageData = ref<string[]>([]);
+const generateProgress = ref(0);
 // 生成卡片
-const generateCard = () => {
-  // TODO: 生成卡片
+const generateCard = async () => {
+  if (dataSource.value.length === 0) {
+    message.error('请添加卡片数据')
+    return;
+  }
+  const hide = message.loading('生成中...', 0); // 显示loading
+  generateProgress.value = 0;
+  // 每一张纸上应该印什么？
+  const paperDataList = cardTools.createPaperData(dataSource.value, config.value)
+  // 渲染纸张
+  paperImageData.value = []
+  for (let i = 0; i < paperDataList.length; i++) {
+    const paperData = paperDataList[i];
+    const img = await cardTools.createImage(paperData);
+    const imgDom = document.createElement('img');
+    imgDom.src = img;
+    // 加入列表
+    paperImageData.value.push(img);
+    generateProgress.value = Math.floor((i+1) / paperDataList.length * 100);
+  }
+  hide(); // 关闭loading
+}
+const createPdf = async () => {
+  if (paperImageData.value.length === 0) {
+    message.error('请先生成卡片')
+    return;
+  }
+  if (generateProgress.value !== 100) {
+    message.error('卡片还未生成完成')
+    return;
+  }
+  const hide = message.loading('导出中...', 0); // 显示loading
+  const pafBlob = await cardTools.createPdf(paperImageData.value, config.value.paper)
+  hide(); // 关闭loading
+  // 下载提示框
+  const url = URL.createObjectURL(pafBlob);
+  const a = document.createElement('a');
+  a.href = url;
+  // Modal 
+  const modal = Modal.success({
+    title: '导出成功',
+    content: '点击下载按钮下载卡片',
+    footer: ()=> h('div', {style: 'display: flex; flex-direction: row-reverse;'}, [
+      h(Button, { type: 'primary', onClick: () => {
+        a.download = '卡片.pdf';
+        a.click();
+        modal.destroy();
+      } }, { default: () => '下载' }),
+      h(Button, { style: 'margin-right: 8px;', onClick: () => {
+        a.target = '_blank';
+        a.click();
+        modal.destroy();
+      } }, { default: () => '预览' }),
+      h(Button, { style: 'margin-right: 8px;', onClick: () => {
+        modal.destroy();
+      } }, { default: () => '取消' }),
+    ]),
+  });
 }
 
-const data = [
+const data: cardTools.cardContent[] = [
   { front: '正面', back: '反面', content: '备注',},
   { front: '正面', back: '反面', content: '备注',},
   { front: '正面', back: '反面',},
@@ -194,14 +275,14 @@ const dataSource = ref(data.map((item, index) => ({ ...item, key: index+1 })));
   overflow-y: auto;
 }
 .card-list {
-  height: calc(var(--content-min-height) - 40px);
+  height: calc(var(--content-min-height) - 62px);
   width: 100%;
   background-color: #fff;
   overflow-y: auto;
 }
 
 /* 媒体查询，当屏幕宽度小于600px时，将布局改为上下排列 */
-@media (max-width: 600px) {
+@media (max-width: 750px) {
   .left, .right {
     width: 100%;
     border-right: none;
