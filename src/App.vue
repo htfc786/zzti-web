@@ -21,6 +21,7 @@
           <a-menu-item key="/card">卡片</a-menu-item>
           <a-sub-menu title="工具">
             <a-menu-item key="/tools/word">单词解析</a-menu-item>
+            <a-menu-item key="/tools/wyw">文言实词解析</a-menu-item>
           </a-sub-menu>
           <a-menu-item>
             <a href="https://github.com/htfc786/zzti-web" target="_blank">

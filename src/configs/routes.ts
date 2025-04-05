@@ -30,7 +30,11 @@ export default [
       {
         path: "word",
         component: () => import("../pages/tools/word.vue"),
-      }
+      },
+      {
+        path: "wyw",
+        component: () => import("../pages/tools/wyw.vue"),
+      },
     ]
   },
   // 404页面
