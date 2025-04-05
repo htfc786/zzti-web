@@ -46,6 +46,7 @@
         <!-- 配置信息 -->
         <div class="config" style="line-height: 24px;">
           <a-row>
+            <a-button type="primary" @click="importData">导入数据</a-button>
             <a-button @click="addCard">添加信息</a-button>
           </a-row>
           <a-row>正面：
@@ -97,27 +98,30 @@
         </a-row>
       </a-col>
     </a-row>
+    <a-modal v-model:open="importModalVisible" title="导入数据" @ok="importModalOk" @cancel="importModalCancel">
+      <a-tree-select
+        v-model:value="treeValue"
+        :tree-data="treeData"
+        style="width: 100%"
+        tree-checkable
+        allow-clear
+        :show-checked-strategy="TreeSelect.SHOW_PARENT"
+        placeholder="Please select"
+        tree-node-filter-prop="label"
+        :tree-line="true"
+      />
+    </a-modal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, reactive, h } from 'vue'
-import { message, Modal, Button } from 'ant-design-vue'
+import { ref, reactive, h } from 'vue'
+import { message, Modal, Button, TreeSelect } from 'ant-design-vue'
+import type { TreeSelectProps } from 'ant-design-vue'
 import * as cardTools from '../core/card'
+import { getTreeDataByQues, getPathListByTreeValueList } from '../core/questions'
+import { getQuestionByPathList } from '../questions'
 
-const contentHeight = ref(0)
-onMounted(() => {
-  // 获取页面高度
-  const dom = document.getElementById('CardPage')!
-  contentHeight.value = dom.clientHeight
-  const resize = () => {
-    contentHeight.value = dom.clientHeight
-  }
-  window.addEventListener('resize', resize)
-  onUnmounted(() => {
-    window.removeEventListener('resize', resize)
-  })
-})
 // 关于表格
 const columns = [
   { title: '#', dataIndex: 'index', width: '10%' },
@@ -268,6 +272,35 @@ const data: cardTools.cardContent[] = [
 ]
 
 const dataSource = ref(data);
+
+// 导入数据相关
+const importModalVisible = ref(false);
+const treeValue = ref<Array<string>>(["\\"]) // 选择的范围
+const treeData: TreeSelectProps['treeData'] = getTreeDataByQues()
+const importData = () => {
+  // pathList = getPathListByTreeValueList(treeValue.value)
+  importModalVisible.value = true;
+};
+const importModalOk = () => {
+  importModalVisible.value = false;
+  // 获取题目
+  const pathList = getPathListByTreeValueList(treeValue.value)
+  const quesList = getQuestionByPathList(pathList);
+  // 添加到数据源
+  quesList?.forEach((ques) => {
+    dataSource.value.push({     // @ts-ignore
+      front: ques?.q,           // @ts-ignore
+      back: ques?.ans || '',    // @ts-ignore
+      content: ques?.con || '', // @ts-ignore
+    })
+  })
+  // 清空选择
+  treeValue.value = ["\\"]
+
+};
+const importModalCancel = () => {
+  importModalVisible.value = false;
+};
 </script>
 
 <style scoped>
