@@ -86,10 +86,13 @@ function getObj(path) {
         // 加入总结果
         result += `"${name}": ${fileResult}, `;
       } else if (file_list.length>=2 && file_list[file_list.length - 1] === "json") {
+        // 文件名，去除扩展名
+        file_list.pop();
+        const name = file_list.join(".");
         // 处理json文件
         const data_text = fs.readFileSync(itemPath, fileEncoding);
         const data = JSON.parse(data_text);
-        result += `"${item}": ${JSON.stringify(data)}, `;
+        result += `"${name}": ${JSON.stringify(data)}, `;
       }
     }
   });

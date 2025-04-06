@@ -203,7 +203,7 @@ export function parseComment(text: string): IWord[] {
     // 1. 获取短句
     const shortSentence = getShortSentence(article, flag, word, flagPos)
     if (!shortSentence) { continue; }
-    const { sentence, start, end, flagIndex } = shortSentence
+    const { sentence, flagIndex } = shortSentence
     // 更新flag位置
     flagPosMap.set(flag, (flagIndex || 0) + 1)
     // 2. 处理注释内容

@@ -47,6 +47,7 @@ import {
   getMenuKeyByPath,
   getMenuObj,
   getPathByMenuKey,
+  getFirstPath,
 } from '../core/questions'
 import { getQuestionByPath } from '../questions'
 
@@ -56,7 +57,7 @@ const selectedKeys = ref<string[]>([''])
 //题目列表信息
 const questionData = <any>ref([])
 // 题目路径
-const questionPath = <any>ref([])
+const questionPath = <any>ref(getFirstPath())
 
 // 菜单值更改时，重新获取路径
 const handleClick: MenuProps['onClick'] = (e) => {

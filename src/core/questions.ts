@@ -226,3 +226,22 @@ export const checkPathList = (
   }
   return { pathList: res, error: true, del: noRes }
 }
+
+/**
+ * 获取菜单项第一项路径
+ * @returns 第一项路径
+ * */
+export const getFirstPath = (quesObj?: Object): any => {
+  if (!quesObj) {
+    quesObj = getQuestionObj()
+  }
+  // 遍历到最底层，有列表，记录key
+  for (const [key, value] of Object.entries(quesObj)) {
+    if (Array.isArray(value)) {
+      return [key]
+    } else {
+      const res = getFirstPath(value)
+      return [key, ...res]
+    }
+  }
+}
